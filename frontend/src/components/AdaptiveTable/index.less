@@ -1,0 +1,77 @@
+.oa-adaptive-table {
+  min-width: 0;
+  max-width: 100%;
+
+  .ant-table-thead > tr > th {
+    white-space: nowrap;
+  }
+
+  .ant-table-tbody > tr > td {
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .ant-table-content,
+  .ant-table-body {
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ant-table-cell .ant-tag {
+    white-space: normal;
+  }
+
+  .ant-table-pagination {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+}
+
+@media (max-width: 1366px), (pointer: coarse) {
+  .oa-adaptive-table {
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      padding: 12px;
+    }
+
+    .ant-btn {
+      min-height: 44px;
+    }
+
+    .ant-table-cell a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding-inline: 4px;
+    }
+
+    .ant-checkbox-wrapper {
+      min-width: 32px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ant-pagination-item,
+    .ant-pagination-prev,
+    .ant-pagination-next {
+      min-width: 44px;
+      height: 44px;
+      line-height: 42px;
+    }
+
+    .ant-table-row-expand-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ant-pro-table-list-toolbar-container {
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .ant-pro-table-list-toolbar-right {
+      flex-wrap: wrap;
+    }
+  }
+}

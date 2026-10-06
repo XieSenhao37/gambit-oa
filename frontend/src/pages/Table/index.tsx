@@ -1,0 +1,239 @@
+import { ProTable } from '@/components/AdaptiveTable';
+import services from '@/services/demo';
+import {
+  ActionType,
+  PageContainer,
+  ProColumns,
+  ProDescriptions,
+  ProDescriptionsItemProps,
+} from '@ant-design/pro-components';
+import { Button, Divider, Drawer, message } from 'antd';
+import React, { useRef, useState } from 'react';
+import CreateForm from './components/CreateForm';
+import UpdateForm, { FormValueType } from './components/UpdateForm';
+
+const { addUser, queryUserList, modifyUser } = services.UserController;
+
+/**
+ * 添加节点
+ * @param fields
+ */
+const handleAdd = async (fields: API.UserInfo) => {
+  const hide = message.loading('正在添加');
+  try {
+    await addUser({ ...fields });
+    hide();
+    message.success('添加成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('添加失败请重试！');
+    return false;
+  }
+};
+
+/**
+ * 更新节点
+ * @param fields
+ */
+const handleUpdate = async (fields: FormValueType) => {
+  const hide = message.loading('正在配置');
+  try {
+    await modifyUser(
+      {
+        userId: fields.id || '',
+      },
+      {
+        name: fields.name || '',
+        nickName: fields.nickName || '',
+        email: fields.email || '',
+      },
+    );
+    hide();
+
+    message.success('配置成功');
+    return true;
+  } catch (error) {
+    hide();
+    message.error('配置失败请重试！');
+    return false;
+  }
+};
+
+const TableList: React.FC<unknown> = () => {
+  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [updateModalVisible, handleUpdateModalVisible] =
+    useState<boolean>(false);
+  const [stepFormValues, setStepFormValues] = useState({});
+  const actionRef = useRef<ActionType>();
+  const [row, setRow] = useState<API.UserInfo>();
+  const tableColumns: ProColumns<API.UserInfo>[] = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+      tooltip: '名称是唯一的 key',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '名称为必填项',
+          },
+        ],
+      },
+    },
+    {
+      title: '昵称',
+      dataIndex: 'nickName',
+      valueType: 'text',
+    },
+    {
+      title: '性别',
+      dataIndex: 'gender',
+      hideInForm: true,
+      valueEnum: {
+        0: { text: '男', status: 'MALE' },
+        1: { text: '女', status: 'FEMALE' },
+      },
+    },
+    {
+      title: '操作',
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => (
+        <>
+          <a
+            onClick={() => {
+              handleUpdateModalVisible(true);
+              setStepFormValues(record);
+            }}
+          >
+            配置
+          </a>
+          <Divider type="vertical" />
+          <a href="">订阅警报</a>
+        </>
+      ),
+    },
+  ];
+  const descriptionColumns: ProDescriptionsItemProps<API.UserInfo>[] = [
+    {
+      title: '名称',
+      dataIndex: 'name',
+    },
+    {
+      title: '昵称',
+      dataIndex: 'nickName',
+      valueType: 'text',
+    },
+    {
+      title: '性别',
+      dataIndex: 'gender',
+      valueEnum: {
+        0: { text: '男', status: 'MALE' },
+        1: { text: '女', status: 'FEMALE' },
+      },
+    },
+  ];
+
+  return (
+    <PageContainer
+      header={{
+        title: 'CRUD 示例',
+      }}
+    >
+      <ProTable<API.UserInfo>
+        headerTitle="查询表格"
+        actionRef={actionRef}
+        rowKey="id"
+        search={{
+          labelWidth: 120,
+        }}
+        toolBarRender={() => [
+          <Button
+            key="1"
+            type="primary"
+            onClick={() => handleModalVisible(true)}
+          >
+            新建
+          </Button>,
+        ]}
+        request={async (params) => {
+          const { data, success } = await queryUserList({
+            keyword: params.keyword,
+            current: params.current,
+            pageSize: params.pageSize,
+          });
+          return {
+            data: data?.list || [],
+            success,
+          };
+        }}
+        columns={tableColumns}
+      />
+      <CreateForm
+        onCancel={() => handleModalVisible(false)}
+        modalVisible={createModalVisible}
+      >
+        <ProTable<API.UserInfo, API.UserInfo>
+          onSubmit={async (value) => {
+            const success = await handleAdd(value);
+            if (success) {
+              handleModalVisible(false);
+              if (actionRef.current) {
+                await actionRef.current.reload();
+              }
+            }
+          }}
+          rowKey="id"
+          type="form"
+          columns={tableColumns}
+        />
+      </CreateForm>
+      {stepFormValues && Object.keys(stepFormValues).length ? (
+        <UpdateForm
+          onSubmit={async (value) => {
+            const success = await handleUpdate(value);
+            if (success) {
+              handleUpdateModalVisible(false);
+              setStepFormValues({});
+              if (actionRef.current) {
+                await actionRef.current.reload();
+              }
+            }
+          }}
+          onCancel={() => {
+            handleUpdateModalVisible(false);
+            setStepFormValues({});
+          }}
+          updateModalVisible={updateModalVisible}
+          values={stepFormValues}
+        />
+      ) : null}
+
+      <Drawer
+        width={600}
+        open={!!row}
+        onClose={() => {
+          setRow(undefined);
+        }}
+        closable={false}
+      >
+        {row?.name && (
+          <ProDescriptions<API.UserInfo>
+            column={2}
+            title={row?.name}
+            request={async () => ({
+              data: row || {},
+            })}
+            params={{
+              id: row?.name,
+            }}
+            columns={descriptionColumns}
+          />
+        )}
+      </Drawer>
+    </PageContainer>
+  );
+};
+
+export default TableList;

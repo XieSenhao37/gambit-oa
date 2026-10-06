@@ -1,0 +1,110 @@
+.page,
+.groupList,
+.cardContent {
+  width: 100%;
+}
+
+.reconciliation {
+  padding: 16px;
+  overflow: hidden;
+  background: #f5f8ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 8px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sectionHeading :global(.ant-typography) {
+  margin-top: 0;
+  margin-bottom: 2px;
+}
+
+.groupRow {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.groupSummary {
+  flex: 0 0 340px;
+  border-color: #adc6ff;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.summaryGrid :global(.ant-statistic-title) {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+
+.summaryGrid :global(.ant-statistic-content) {
+  font-size: 18px;
+}
+
+.groupOrders {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 12px;
+  min-width: 0;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  white-space: nowrap;
+  overscroll-behavior-x: contain;
+}
+
+.groupOrderCard {
+  flex: 0 0 245px;
+}
+
+.orderCard {
+  height: 100%;
+  min-height: 430px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.orderCard:hover {
+  border-color: #91caff;
+  box-shadow: 0 6px 20px rgba(5, 5, 5, 8%);
+}
+
+.actualAmount {
+  margin-top: 2px;
+  color: #0958d9;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.actions {
+  margin-top: auto;
+}
+
+@media (max-width: 767px) {
+  .reconciliation {
+    padding: 12px;
+  }
+
+  .groupSummary {
+    flex-basis: 280px;
+  }
+
+  .orderCard {
+    min-height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orderCard {
+    transition: none;
+  }
+}

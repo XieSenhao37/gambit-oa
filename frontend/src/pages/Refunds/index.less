@@ -1,0 +1,51 @@
+.refund-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.6;
+}
+
+.refund-order-info {
+  min-width: 0;
+}
+
+.refund-order-title {
+  display: box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.refund-phone {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.refund-table .ant-table-cell .ant-space {
+  flex-wrap: wrap;
+}
+
+.refund-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  padding: 12px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.refund-detail-wide {
+  grid-column: 1 / -1;
+}
+@media (max-width: 600px) {
+  .refund-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.refund-table .ant-table-row-expand-icon-cell .ant-btn {
+  width: 100%;
+  padding-inline: 0;
+}

@@ -1,0 +1,214 @@
+[
+  {
+    "id": "workbench",
+    "path": "/workbench",
+    "name": "工作台",
+    "component": "./Workbench",
+    "scope": "store"
+  },
+  {
+    "id": "dashboard",
+    "path": "/dashboard",
+    "name": "数据仪表盘",
+    "component": "./Dashboard",
+    "scope": "store"
+  },
+  {
+    "id": "orders",
+    "path": "/orders",
+    "name": "历史游玩订单",
+    "component": "./Orders",
+    "scope": "store",
+    "group": {
+      "id": "order-center",
+      "name": "订单中心"
+    }
+  },
+  {
+    "id": "catering-orders",
+    "path": "/catering-orders",
+    "name": "历史餐饮订单",
+    "component": "./CateringOrders",
+    "scope": "store",
+    "group": {
+      "id": "order-center",
+      "name": "订单中心"
+    }
+  },
+  {
+    "id": "refunds",
+    "path": "/refunds",
+    "name": "退款管理",
+    "component": "./Refunds",
+    "scope": "store",
+    "group": {
+      "id": "order-center",
+      "name": "订单中心"
+    }
+  },
+  {
+    "id": "dishes",
+    "path": "/dishes",
+    "name": "门店菜单",
+    "component": "./Dish",
+    "scope": "store",
+    "group": {
+      "id": "catering-center",
+      "name": "餐饮"
+    }
+  },
+  {
+    "id": "dish-library",
+    "path": "/dish-library",
+    "name": "餐品信息库",
+    "component": "./DishLibrary",
+    "scope": "global",
+    "group": {
+      "id": "catering-center",
+      "name": "餐饮"
+    }
+  },
+  {
+    "id": "events",
+    "path": "/events",
+    "name": "赛事大盘",
+    "component": "./Events",
+    "scope": "store",
+    "group": {
+      "id": "card-center",
+      "name": "卡牌"
+    }
+  },
+  {
+    "id": "wallet-tiers",
+    "path": "/wallet-tiers",
+    "name": "充值档位",
+    "component": "./WalletTiers",
+    "scope": "global",
+    "group": {
+      "id": "wallet-center",
+      "name": "储值"
+    }
+  },
+  {
+    "id": "point-products",
+    "path": "/point-products",
+    "name": "积分商品",
+    "component": "./PointProducts",
+    "scope": "global",
+    "group": {
+      "id": "point-center",
+      "name": "积分"
+    }
+  },
+  {
+    "id": "point-categories",
+    "path": "/point-categories",
+    "name": "积分分类",
+    "component": "./PointCategories",
+    "scope": "global",
+    "group": {
+      "id": "point-center",
+      "name": "积分"
+    }
+  },
+  {
+    "id": "point-withdraws",
+    "path": "/point-withdraws",
+    "name": "积分提取审计",
+    "component": "./PointWithdraws",
+    "scope": "store",
+    "group": {
+      "id": "point-center",
+      "name": "积分"
+    }
+  },
+  {
+    "id": "point-redeem-orders",
+    "path": "/point-redeem-orders",
+    "name": "积分兑换明细",
+    "component": "./PointRedeemOrders",
+    "scope": "store",
+    "group": {
+      "id": "point-center",
+      "name": "积分"
+    }
+  },
+  {
+    "id": "point-config",
+    "path": "/point-config",
+    "name": "积分规则",
+    "component": "./PointConfig",
+    "scope": "global",
+    "group": {
+      "id": "point-center",
+      "name": "积分"
+    }
+  },
+  {
+    "id": "home-banners",
+    "path": "/home-banners",
+    "name": "展示管理",
+    "component": "./DisplayManagement",
+    "scope": "global",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
+  },
+  {
+    "id": "games",
+    "path": "/games",
+    "name": "桌游库存",
+    "component": "./Games",
+    "scope": "store",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
+  },
+  {
+    "id": "game-library",
+    "path": "/game-library",
+    "name": "桌游信息库",
+    "component": "./GameLibrary",
+    "scope": "global",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
+  },
+  {
+    "id": "users",
+    "path": "/users",
+    "name": "用户管理",
+    "component": "./Users",
+    "scope": "store",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
+  },
+  {
+    "id": "staff-access",
+    "path": "/staff-access",
+    "name": "员工及门店授权管理",
+    "component": "./StaffAccess",
+    "scope": "admin",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
+  },
+  {
+    "id": "settlement",
+    "path": "/settlement",
+    "name": "门店结算",
+    "component": "./Settlement",
+    "scope": "store",
+    "group": {
+      "id": "finance-center",
+      "name": "财务结算"
+    }
+  }
+]

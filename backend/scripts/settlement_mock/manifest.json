@@ -1,0 +1,2340 @@
+{
+  "prefix": "MOCK_SETTLE_20260927",
+  "cutoff": "2026-07-01 00:00:00",
+  "sql_sha256": "4b1068e29691f6b73257186ae5f3c1f24ddc672d685681b1dc1bb60f7db9776f",
+  "rows": [
+    {
+      "table": "stores",
+      "values": {
+        "id": 870927001,
+        "code": "mock-settle-a",
+        "name": "MOCK-A-收款店",
+        "status": 1,
+        "sort": 9001,
+        "address": "仅测试环境模拟门店，无真实地址",
+        "business_hours": "模拟数据",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "stores",
+      "values": {
+        "id": 870927002,
+        "code": "mock-settle-b",
+        "name": "MOCK-B-跨店履约",
+        "status": 1,
+        "sort": 9002,
+        "address": "仅测试环境模拟门店，无真实地址",
+        "business_hours": "模拟数据",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "stores",
+      "values": {
+        "id": 870927003,
+        "code": "mock-settle-c",
+        "name": "MOCK-C-当期补款",
+        "status": 1,
+        "sort": 9003,
+        "address": "仅测试环境模拟门店，无真实地址",
+        "business_hours": "模拟数据",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "stores",
+      "values": {
+        "id": 870927004,
+        "code": "mock-settle-d",
+        "name": "MOCK-D-零净额",
+        "status": 1,
+        "sort": 9004,
+        "address": "仅测试环境模拟门店，无真实地址",
+        "business_hours": "模拟数据",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_periods",
+      "values": {
+        "month": "2026-07",
+        "status": "draft"
+      }
+    },
+    {
+      "table": "settlement_periods",
+      "values": {
+        "month": "2026-08",
+        "status": "draft"
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927011,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "nick_name": "MOCK-微信消费",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927012,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "nick_name": "MOCK-储值跨批次退款",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "dishes",
+      "values": {
+        "store_id": 870927002,
+        "name": "MOCK-测试饮料",
+        "price": 2000,
+        "status": 0,
+        "category_ids": [],
+        "options": [],
+        "tags": [],
+        "id": 870927109,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "in_time": "2026-07-05 10:00:00",
+        "out_time": "2026-07-05 12:00:00",
+        "play_time": 2,
+        "amount": 10000,
+        "settle_status": 1,
+        "unit_price": 5000,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-05 12:00:00",
+        "id": 870927110,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 10000,
+        "total_amount": 10000,
+        "wallet_amount": 0,
+        "wechat_amount": 10000,
+        "pay_type": 0,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-05 12:00:00",
+        "created_at": "2026-07-05 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_july-play",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927110,
+        "id": 870927111,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "caterings",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "total_price": 6000,
+        "status": 1,
+        "settle_status": 1,
+        "code": "MOCK_SETTLE_20260927-july-food",
+        "created_at": "2026-07-06 12:00:00",
+        "updated_at": "2026-07-06 12:00:00",
+        "comment": "MOCK模拟订单",
+        "id": 870927112,
+        "takeaway": false
+      }
+    },
+    {
+      "table": "catering_items",
+      "values": {
+        "catering_id": 870927112,
+        "dish_id": 870927109,
+        "count": 1,
+        "total_price": 6000,
+        "selections": [],
+        "id": 870927113,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 6000,
+        "total_amount": 6000,
+        "wallet_amount": 0,
+        "wechat_amount": 6000,
+        "pay_type": 0,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-06 12:00:00",
+        "created_at": "2026-07-06 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_july-food",
+        "description": "MOCK模拟支付",
+        "catering_id": 870927112,
+        "id": 870927114,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "in_time": "2026-07-07 10:00:00",
+        "out_time": "2026-07-07 12:00:00",
+        "play_time": 2,
+        "amount": 2000,
+        "settle_status": 1,
+        "unit_price": 1000,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-07 12:00:00",
+        "id": 870927115,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 2000,
+        "total_amount": 2000,
+        "wallet_amount": 0,
+        "wechat_amount": 2000,
+        "pay_type": 0,
+        "pay_status": 3,
+        "pay_end_time": "2026-07-07 12:00:00",
+        "created_at": "2026-07-07 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_same-month-refund",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927115,
+        "id": 870927116,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 2000,
+        "refund_amount": 2000
+      }
+    },
+    {
+      "table": "refund_requests",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "order_type": "play",
+        "order_id": 870927115,
+        "pay_order_id": 870927116,
+        "amount": 2000,
+        "status": "refunded",
+        "created_at": "2026-07-08 12:00:00",
+        "reviewed_at": "2026-07-08 12:00:00",
+        "refunded_at": "2026-07-08 12:00:00",
+        "out_refund_no": "MOCK_SETTLE_20260927870927116",
+        "review_remark": "MOCK已成功退款，无外部调用",
+        "id": 870927117,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "in_time": "2026-07-25 10:00:00",
+        "out_time": "2026-07-25 12:00:00",
+        "play_time": 2,
+        "amount": 5000,
+        "settle_status": 1,
+        "unit_price": 2500,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-25 12:00:00",
+        "id": 870927118,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 5000,
+        "total_amount": 5000,
+        "wallet_amount": 0,
+        "wechat_amount": 5000,
+        "pay_type": 0,
+        "pay_status": 3,
+        "pay_end_time": "2026-07-25 12:00:00",
+        "created_at": "2026-07-25 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_cross-month-refund",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927118,
+        "id": 870927119,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 5000,
+        "refund_amount": 5000
+      }
+    },
+    {
+      "table": "refund_requests",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "order_type": "play",
+        "order_id": 870927118,
+        "pay_order_id": 870927119,
+        "amount": 5000,
+        "status": "refunded",
+        "created_at": "2026-08-03 12:00:00",
+        "reviewed_at": "2026-08-03 12:00:00",
+        "refunded_at": "2026-08-03 12:00:00",
+        "out_refund_no": "MOCK_SETTLE_20260927870927119",
+        "review_remark": "MOCK已成功退款，无外部调用",
+        "id": 870927120,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927004,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "in_time": "2026-07-09 10:00:00",
+        "out_time": "2026-07-09 12:00:00",
+        "play_time": 2,
+        "amount": 1000,
+        "settle_status": 1,
+        "unit_price": 500,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-09 12:00:00",
+        "id": 870927121,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927004,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 1000,
+        "total_amount": 1000,
+        "wallet_amount": 0,
+        "wechat_amount": 1000,
+        "pay_type": 0,
+        "pay_status": 3,
+        "pay_end_time": "2026-07-09 12:00:00",
+        "created_at": "2026-07-09 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_zero-net",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927121,
+        "id": 870927122,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 1000,
+        "refund_amount": 1000
+      }
+    },
+    {
+      "table": "refund_requests",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "order_type": "play",
+        "order_id": 870927121,
+        "pay_order_id": 870927122,
+        "amount": 1000,
+        "status": "refunded",
+        "created_at": "2026-07-10 12:00:00",
+        "reviewed_at": "2026-07-10 12:00:00",
+        "refunded_at": "2026-07-10 12:00:00",
+        "out_refund_no": "MOCK_SETTLE_20260927870927122",
+        "review_remark": "MOCK已成功退款，无外部调用",
+        "id": 870927123,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "in_time": "2026-08-08 10:00:00",
+        "out_time": "2026-08-08 12:00:00",
+        "play_time": 2,
+        "amount": 3000,
+        "settle_status": 1,
+        "unit_price": 1500,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-08-08 12:00:00",
+        "id": 870927124,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 3000,
+        "total_amount": 3000,
+        "wallet_amount": 0,
+        "wechat_amount": 3000,
+        "pay_type": 0,
+        "pay_status": 1,
+        "pay_end_time": "2026-08-08 12:00:00",
+        "created_at": "2026-08-08 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_aug-play",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927124,
+        "id": 870927125,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "caterings",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "total_price": 8000,
+        "status": 1,
+        "settle_status": 1,
+        "code": "MOCK_SETTLE_20260927-aug-food",
+        "created_at": "2026-08-09 12:00:00",
+        "updated_at": "2026-08-09 12:00:00",
+        "comment": "MOCK模拟订单",
+        "id": 870927126,
+        "takeaway": false
+      }
+    },
+    {
+      "table": "catering_items",
+      "values": {
+        "catering_id": 870927126,
+        "dish_id": 870927109,
+        "count": 1,
+        "total_price": 8000,
+        "selections": [],
+        "id": 870927127,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 8000,
+        "total_amount": 8000,
+        "wallet_amount": 0,
+        "wechat_amount": 8000,
+        "pay_type": 0,
+        "pay_status": 1,
+        "pay_end_time": "2026-08-09 12:00:00",
+        "created_at": "2026-08-09 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_aug-food",
+        "description": "MOCK模拟支付",
+        "catering_id": 870927126,
+        "id": 870927128,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "in_time": "2026-07-12 10:00:00",
+        "out_time": "2026-07-12 12:00:00",
+        "play_time": 2,
+        "amount": 99900,
+        "settle_status": 1,
+        "unit_price": 49950,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-12 12:00:00",
+        "id": 870927129,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u1",
+        "amount": 99900,
+        "total_amount": 99900,
+        "wallet_amount": 0,
+        "wechat_amount": 99900,
+        "pay_type": 0,
+        "pay_status": 0,
+        "pay_end_time": "2026-07-12 12:00:00",
+        "created_at": "2026-07-12 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_unpaid-excluded",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927129,
+        "id": 870927130,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "wallet_accounts",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "balance": 13000,
+        "frozen_balance": 0,
+        "id": 870927131,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00",
+        "status": 0
+      }
+    },
+    {
+      "table": "wallet_recharge_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "amount": 10000,
+        "bonus_amount": 2000,
+        "status": 1,
+        "paid_at": "2026-07-02 12:00:00",
+        "created_at": "2026-07-02 12:00:00",
+        "id": 870927132,
+        "updated_at": "2026-07-01 00:00:00",
+        "pay_order_id": 870927133
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "amount": 10000,
+        "wechat_amount": 10000,
+        "pay_type": 0,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-02 12:00:00",
+        "created_at": "2026-07-02 12:00:00",
+        "wallet_recharge_order_id": 870927132,
+        "order_id": "MOCK_SETTLE_20260927_recharge0",
+        "id": 870927133,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_amount": 0,
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "recharge",
+        "direction": "in",
+        "amount": 10000,
+        "balance_before": 0,
+        "balance_after": 10000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:33",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-07-02 12:00:00",
+        "related_recharge_order_id": 870927132,
+        "id": 870927134,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "bonus",
+        "direction": "in",
+        "amount": 2000,
+        "balance_before": 10000,
+        "balance_after": 12000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:34",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-07-02 12:00:00",
+        "related_recharge_order_id": 870927132,
+        "id": 870927135,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "wallet",
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "source_key": "wallet:recharge:870927132",
+        "source_store_id": 870927001,
+        "responsible_store_id": 0,
+        "face_total": 12000,
+        "principal_total": 10000,
+        "remaining": 6000,
+        "principal_remaining": 5000,
+        "created_at": "2026-07-02 12:00:00",
+        "id": 870927136,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "wallet_recharge_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "amount": 5000,
+        "bonus_amount": 5000,
+        "status": 1,
+        "paid_at": "2026-07-03 12:00:00",
+        "created_at": "2026-07-03 12:00:00",
+        "id": 870927137,
+        "updated_at": "2026-07-01 00:00:00",
+        "pay_order_id": 870927138
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "amount": 5000,
+        "wechat_amount": 5000,
+        "pay_type": 0,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-03 12:00:00",
+        "created_at": "2026-07-03 12:00:00",
+        "wallet_recharge_order_id": 870927137,
+        "order_id": "MOCK_SETTLE_20260927_recharge1",
+        "id": 870927138,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_amount": 0,
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "recharge",
+        "direction": "in",
+        "amount": 5000,
+        "balance_before": 12000,
+        "balance_after": 17000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:38",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-07-03 12:00:00",
+        "related_recharge_order_id": 870927137,
+        "id": 870927139,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "bonus",
+        "direction": "in",
+        "amount": 5000,
+        "balance_before": 17000,
+        "balance_after": 22000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:39",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-07-03 12:00:00",
+        "related_recharge_order_id": 870927137,
+        "id": 870927140,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "wallet",
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "source_key": "wallet:recharge:870927137",
+        "source_store_id": 870927001,
+        "responsible_store_id": 0,
+        "face_total": 10000,
+        "principal_total": 5000,
+        "remaining": 7000,
+        "principal_remaining": 3500,
+        "created_at": "2026-07-03 12:00:00",
+        "id": 870927141,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "in_time": "2026-07-15 10:00:00",
+        "out_time": "2026-07-15 12:00:00",
+        "play_time": 2,
+        "amount": 12000,
+        "settle_status": 1,
+        "unit_price": 6000,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-15 12:00:00",
+        "id": 870927142,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "amount": 12000,
+        "total_amount": 12000,
+        "wallet_amount": 6000,
+        "wechat_amount": 6000,
+        "pay_type": 4,
+        "pay_status": 3,
+        "pay_end_time": "2026-07-15 12:00:00",
+        "created_at": "2026-07-15 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_mixed",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927142,
+        "id": 870927143,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 6000,
+        "wechat_refund_amount": 6000,
+        "refund_amount": 12000
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "in_time": "2026-07-20 10:00:00",
+        "out_time": "2026-07-20 12:00:00",
+        "play_time": 2,
+        "amount": 9000,
+        "settle_status": 1,
+        "unit_price": 4500,
+        "comment": "MOCK模拟订单",
+        "created_at": "2026-07-20 12:00:00",
+        "id": 870927144,
+        "updated_at": "2026-07-01 00:00:00",
+        "billing_mode": 0
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "amount": 9000,
+        "total_amount": 9000,
+        "wallet_amount": 9000,
+        "wechat_amount": 0,
+        "pay_type": 3,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-20 12:00:00",
+        "created_at": "2026-07-20 12:00:00",
+        "order_id": "MOCK_SETTLE_20260927_cross-batch",
+        "description": "MOCK模拟支付",
+        "play_order_id": 870927144,
+        "id": 870927145,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "refund_requests",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "order_type": "play",
+        "order_id": 870927142,
+        "pay_order_id": 870927143,
+        "amount": 12000,
+        "status": "refunded",
+        "created_at": "2026-08-05 12:00:00",
+        "reviewed_at": "2026-08-05 12:00:00",
+        "refunded_at": "2026-08-05 12:00:00",
+        "out_refund_no": "MOCK_SETTLE_20260927870927143",
+        "review_remark": "MOCK已成功退款，无外部调用",
+        "id": 870927146,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:wallet:870927143:870927136",
+        "batch_id": 870927136,
+        "kind": "wallet",
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "reference": "pay:870927143",
+        "store_id": 870927001,
+        "amount": 6000,
+        "principal": 5000,
+        "state": "returned",
+        "created_at": "2026-07-15 12:00:00",
+        "id": 870927147,
+        "expense_key": ""
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:wallet:870927145:870927136",
+        "batch_id": 870927136,
+        "kind": "wallet",
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "reference": "pay:870927145",
+        "store_id": 870927002,
+        "amount": 6000,
+        "principal": 5000,
+        "state": "consumed",
+        "created_at": "2026-07-20 12:00:00",
+        "id": 870927148,
+        "expense_key": ""
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:wallet:870927145:870927141",
+        "batch_id": 870927141,
+        "kind": "wallet",
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "reference": "pay:870927145",
+        "store_id": 870927002,
+        "amount": 3000,
+        "principal": 1500,
+        "state": "consumed",
+        "created_at": "2026-07-20 12:00:00",
+        "id": 870927149,
+        "expense_key": ""
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "consume",
+        "direction": "out",
+        "amount": 6000,
+        "balance_before": 22000,
+        "balance_after": 16000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:49",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-07-15 12:00:00",
+        "related_pay_order_id": 870927143,
+        "id": 870927150,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_entries",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:wallet:pay:870927143",
+        "month": "2026-07",
+        "event_at": "2026-07-15 12:00:00",
+        "kind": "wallet",
+        "reference": "pay:870927143",
+        "payer_id": 0,
+        "receiver_id": 870927001,
+        "amount": 5000,
+        "face_amount": 6000,
+        "detail": "MOCK按原批次本金比例折算",
+        "id": 870927151,
+        "created_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "consume",
+        "direction": "out",
+        "amount": 9000,
+        "balance_before": 16000,
+        "balance_after": 7000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:51",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-07-20 12:00:00",
+        "related_pay_order_id": 870927145,
+        "id": 870927152,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_entries",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:wallet:pay:870927145",
+        "month": "2026-07",
+        "event_at": "2026-07-20 12:00:00",
+        "kind": "wallet",
+        "reference": "pay:870927145",
+        "payer_id": 0,
+        "receiver_id": 870927002,
+        "amount": 6500,
+        "face_amount": 9000,
+        "detail": "MOCK按原批次本金比例折算",
+        "id": 870927153,
+        "created_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "wallet_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u2",
+        "account_id": 870927131,
+        "type": "refund",
+        "direction": "in",
+        "amount": 6000,
+        "balance_before": 7000,
+        "balance_after": 13000,
+        "frozen_before": 0,
+        "frozen_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:wallet:53",
+        "remark": "MOCK储值流水",
+        "created_at": "2026-08-05 12:00:00",
+        "related_pay_order_id": 870927143,
+        "related_refund_request_id": 870927146,
+        "id": 870927154,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_entries",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:wallet:refund",
+        "month": "2026-08",
+        "event_at": "2026-08-05 12:00:00",
+        "kind": "wallet_refund",
+        "reference": "pay:870927143",
+        "payer_id": 0,
+        "receiver_id": 870927001,
+        "amount": -5000,
+        "face_amount": -6000,
+        "detail": "MOCK跨月退款，退回原本金",
+        "id": 870927155,
+        "created_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927013,
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "nick_name": "MOCK-跨月线上卡",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00",
+        "month_card_expire": "2026-08-16 00:00:00"
+      }
+    },
+    {
+      "table": "month_card_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "open_period": 1,
+        "duration_days": 30,
+        "amount": 39900,
+        "open_type": 1,
+        "settle_status": 1,
+        "source": "wechat",
+        "store_id": 870927001,
+        "effective_at": "2026-07-17 00:00:00",
+        "created_at": "2026-07-17 00:00:00",
+        "request_key": "MOCK_SETTLE_20260927-card0",
+        "operator": "MOCK",
+        "remark": "MOCK历史卡期，不代表真实收款",
+        "id": 870927157,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_pools",
+      "values": {
+        "source_key": "card:870927157:0",
+        "order_id": 870927157,
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "starts_at": "2026-07-17 00:00:00",
+        "ends_at": "2026-08-16 00:00:00",
+        "amount": 39900,
+        "payer_id": 0,
+        "status": "open",
+        "id": 870927158,
+        "legacy": false
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "store_id": 870927001,
+        "month_card_order_id": 870927157,
+        "amount": 39900,
+        "wechat_amount": 39900,
+        "pay_type": 1,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-17 00:00:00",
+        "created_at": "2026-07-17 00:00:00",
+        "order_id": "MOCK_SETTLE_20260927-cardpay0",
+        "id": 870927159,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_amount": 0,
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "in_time": "2026-07-20 00:00:00",
+        "out_time": "2026-07-20 01:00:00",
+        "play_time": 1,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-07-20 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927160,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927158,
+        "play_order_id": 870927160,
+        "store_id": 870927001,
+        "started_at": "2026-07-20 00:00:00",
+        "ended_at": "2026-07-20 01:00:00",
+        "seconds": 3600,
+        "status": "review",
+        "note": "MOCK待核验",
+        "id": 870927161
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "in_time": "2026-07-21 00:00:00",
+        "out_time": "2026-07-21 02:00:00",
+        "play_time": 2,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-07-21 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927162,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927158,
+        "play_order_id": 870927162,
+        "store_id": 870927002,
+        "started_at": "2026-07-21 00:00:00",
+        "ended_at": "2026-07-21 02:00:00",
+        "seconds": 7200,
+        "status": "valid",
+        "note": "MOCK正常核销",
+        "id": 870927163
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "in_time": "2026-08-02 00:00:00",
+        "out_time": "2026-08-02 03:00:00",
+        "play_time": 3,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-08-02 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927164,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927158,
+        "play_order_id": 870927164,
+        "store_id": 870927001,
+        "started_at": "2026-08-02 00:00:00",
+        "ended_at": "2026-08-02 03:00:00",
+        "seconds": 10800,
+        "status": "valid",
+        "note": "MOCK正常核销",
+        "id": 870927165
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u3",
+        "in_time": "2026-08-03 00:00:00",
+        "out_time": "2026-08-03 01:00:00",
+        "play_time": 1,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-08-03 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927166,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927158,
+        "play_order_id": 870927166,
+        "store_id": 870927002,
+        "started_at": "2026-08-03 00:00:00",
+        "ended_at": "2026-08-03 01:00:00",
+        "seconds": 3600,
+        "status": "valid",
+        "note": "MOCK正常核销",
+        "id": 870927167
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927014,
+        "open_id": "MOCK_SETTLE_20260927_u4",
+        "nick_name": "MOCK-总部赠卡",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00",
+        "month_card_expire": "2026-07-31 00:00:00"
+      }
+    },
+    {
+      "table": "month_card_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u4",
+        "open_period": 1,
+        "duration_days": 30,
+        "amount": 39900,
+        "open_type": 1,
+        "settle_status": 1,
+        "source": "gift",
+        "store_id": 870927001,
+        "effective_at": "2026-07-01 00:00:00",
+        "created_at": "2026-07-01 00:00:00",
+        "request_key": "MOCK_SETTLE_20260927-card1",
+        "operator": "MOCK",
+        "remark": "MOCK历史卡期，不代表真实收款",
+        "id": 870927169,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_pools",
+      "values": {
+        "source_key": "card:870927169:0",
+        "order_id": 870927169,
+        "open_id": "MOCK_SETTLE_20260927_u4",
+        "starts_at": "2026-07-01 00:00:00",
+        "ends_at": "2026-07-31 00:00:00",
+        "amount": 39900,
+        "payer_id": 0,
+        "status": "open",
+        "id": 870927170,
+        "legacy": false
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927003,
+        "open_id": "MOCK_SETTLE_20260927_u4",
+        "in_time": "2026-07-18 00:00:00",
+        "out_time": "2026-07-18 01:00:00",
+        "play_time": 1,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-07-18 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927171,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927170,
+        "play_order_id": 870927171,
+        "store_id": 870927003,
+        "started_at": "2026-07-18 00:00:00",
+        "ended_at": "2026-07-18 01:00:00",
+        "seconds": 3600,
+        "status": "valid",
+        "note": "MOCK正常核销",
+        "id": 870927172
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927015,
+        "open_id": "MOCK_SETTLE_20260927_u5",
+        "nick_name": "MOCK-第三方验券",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00",
+        "month_card_expire": "2026-07-31 00:00:00"
+      }
+    },
+    {
+      "table": "month_card_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u5",
+        "open_period": 1,
+        "duration_days": 30,
+        "amount": 39900,
+        "open_type": 1,
+        "settle_status": 1,
+        "source": "third_party",
+        "store_id": 870927001,
+        "effective_at": "2026-07-01 00:00:00",
+        "created_at": "2026-07-01 00:00:00",
+        "request_key": "MOCK_SETTLE_20260927-card2",
+        "operator": "MOCK",
+        "remark": "MOCK历史卡期，不代表真实收款",
+        "id": 870927174,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_pools",
+      "values": {
+        "source_key": "card:870927174:0",
+        "order_id": 870927174,
+        "open_id": "MOCK_SETTLE_20260927_u5",
+        "starts_at": "2026-07-01 00:00:00",
+        "ends_at": "2026-07-31 00:00:00",
+        "amount": 39900,
+        "payer_id": 0,
+        "status": "open",
+        "id": 870927175,
+        "legacy": false
+      }
+    },
+    {
+      "table": "settlement_card_remittances",
+      "values": {
+        "order_id": 870927174,
+        "voucher_key": "9999999999999999999999999999999999999999999999999999999999999999",
+        "channel": "MOCK美团",
+        "external_no": "MOCK_SETTLE_20260927-voucher",
+        "store_id": 870927001,
+        "amount": 39900,
+        "created_at": "2026-07-01 00:00:00",
+        "status": "pending",
+        "id": 870927176,
+        "payment_ref": ""
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927001,
+        "open_id": "MOCK_SETTLE_20260927_u5",
+        "in_time": "2026-07-18 00:00:00",
+        "out_time": "2026-07-18 01:00:00",
+        "play_time": 1,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-07-18 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927177,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927175,
+        "play_order_id": 870927177,
+        "store_id": 870927001,
+        "started_at": "2026-07-18 00:00:00",
+        "ended_at": "2026-07-18 01:00:00",
+        "seconds": 3600,
+        "status": "valid",
+        "note": "MOCK正常核销",
+        "id": 870927178
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927016,
+        "open_id": "MOCK_SETTLE_20260927_u6",
+        "nick_name": "MOCK-从未使用归总部",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00",
+        "month_card_expire": "2026-07-31 00:00:00"
+      }
+    },
+    {
+      "table": "month_card_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u6",
+        "open_period": 1,
+        "duration_days": 30,
+        "amount": 39900,
+        "open_type": 1,
+        "settle_status": 1,
+        "source": "wechat",
+        "store_id": 870927001,
+        "effective_at": "2026-07-01 00:00:00",
+        "created_at": "2026-07-01 00:00:00",
+        "request_key": "MOCK_SETTLE_20260927-card3",
+        "operator": "MOCK",
+        "remark": "MOCK历史卡期，不代表真实收款",
+        "id": 870927180,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_pools",
+      "values": {
+        "source_key": "card:870927180:0",
+        "order_id": 870927180,
+        "open_id": "MOCK_SETTLE_20260927_u6",
+        "starts_at": "2026-07-01 00:00:00",
+        "ends_at": "2026-07-31 00:00:00",
+        "amount": 39900,
+        "payer_id": 0,
+        "status": "open",
+        "id": 870927181,
+        "legacy": false
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u6",
+        "store_id": 870927001,
+        "month_card_order_id": 870927180,
+        "amount": 39900,
+        "wechat_amount": 39900,
+        "pay_type": 1,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-01 00:00:00",
+        "created_at": "2026-07-01 00:00:00",
+        "order_id": "MOCK_SETTLE_20260927-cardpay3",
+        "id": 870927182,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_amount": 0,
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927017,
+        "open_id": "MOCK_SETTLE_20260927_u7",
+        "nick_name": "MOCK-七月未用八月补分",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00",
+        "month_card_expire": "2026-08-16 00:00:00"
+      }
+    },
+    {
+      "table": "month_card_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u7",
+        "open_period": 1,
+        "duration_days": 30,
+        "amount": 39900,
+        "open_type": 1,
+        "settle_status": 1,
+        "source": "wechat",
+        "store_id": 870927001,
+        "effective_at": "2026-07-17 00:00:00",
+        "created_at": "2026-07-17 00:00:00",
+        "request_key": "MOCK_SETTLE_20260927-card4",
+        "operator": "MOCK",
+        "remark": "MOCK历史卡期，不代表真实收款",
+        "id": 870927184,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_pools",
+      "values": {
+        "source_key": "card:870927184:0",
+        "order_id": 870927184,
+        "open_id": "MOCK_SETTLE_20260927_u7",
+        "starts_at": "2026-07-17 00:00:00",
+        "ends_at": "2026-08-16 00:00:00",
+        "amount": 39900,
+        "payer_id": 0,
+        "status": "open",
+        "id": 870927185,
+        "legacy": false
+      }
+    },
+    {
+      "table": "pay_orders",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u7",
+        "store_id": 870927001,
+        "month_card_order_id": 870927184,
+        "amount": 39900,
+        "wechat_amount": 39900,
+        "pay_type": 1,
+        "pay_status": 1,
+        "pay_end_time": "2026-07-17 00:00:00",
+        "created_at": "2026-07-17 00:00:00",
+        "order_id": "MOCK_SETTLE_20260927-cardpay4",
+        "id": 870927186,
+        "updated_at": "2026-07-01 00:00:00",
+        "wallet_amount": 0,
+        "wallet_refund_amount": 0,
+        "wechat_refund_amount": 0
+      }
+    },
+    {
+      "table": "play_orders",
+      "values": {
+        "store_id": 870927002,
+        "open_id": "MOCK_SETTLE_20260927_u7",
+        "in_time": "2026-08-04 00:00:00",
+        "out_time": "2026-08-04 01:00:00",
+        "play_time": 1,
+        "amount": 0,
+        "settle_status": 1,
+        "billing_mode": 2,
+        "created_at": "2026-08-04 00:00:00",
+        "comment": "MOCK月卡核销",
+        "id": 870927187,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_card_usages",
+      "values": {
+        "pool_id": 870927185,
+        "play_order_id": 870927187,
+        "store_id": 870927002,
+        "started_at": "2026-08-04 00:00:00",
+        "ended_at": "2026-08-04 01:00:00",
+        "seconds": 3600,
+        "status": "valid",
+        "note": "MOCK正常核销",
+        "id": 870927188
+      }
+    },
+    {
+      "table": "point_product_categories",
+      "values": {
+        "name": "MOCK结算测试",
+        "status": 0,
+        "id": 870927189,
+        "sort": 0,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_products",
+      "values": {
+        "name": "MOCK积分礼品",
+        "category_id": 870927189,
+        "points_price": 100,
+        "stock": 10,
+        "status": 0,
+        "id": 870927190,
+        "sort": 0,
+        "max_redeem_per_user": -1,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "raffles",
+      "values": {
+        "created_at": "2026-07-10 00:00:00",
+        "updated_at": "2026-07-23 00:00:00",
+        "title": "MOCK-积分抽奖已开奖",
+        "description": "MOCK仅结算测试，不发送通知",
+        "cover_url": "",
+        "store_id": 870927002,
+        "store_name": "MOCK-B-跨店履约",
+        "pickup_instructions": "模拟已领取",
+        "entry_mode": "points",
+        "points_cost": 100,
+        "draw_mode": "manual",
+        "max_participants": 2,
+        "participant_count": 1,
+        "status": "drawn",
+        "drawn_at": "2026-07-23 00:00:00",
+        "cancel_reason": "",
+        "creator_id": 870927011,
+        "operator_id": 870927011,
+        "request_key": "MOCK_SETTLE_20260927-raffle",
+        "request_hash": "8888888888888888888888888888888888888888888888888888888888888888",
+        "id": 870927191
+      }
+    },
+    {
+      "table": "raffle_prizes",
+      "values": {
+        "raffle_id": 870927191,
+        "name": "MOCK奖品",
+        "quantity": 1,
+        "sort": 1,
+        "id": 870927192
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927020,
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "nick_name": "MOCK-积分场景0",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_accounts",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "balance": 0,
+        "status": 0,
+        "id": 870927194,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_redeem_orders",
+      "values": {
+        "order_no": "MOCK_SETTLE_20260927-redeem0",
+        "request_key": "MOCK_SETTLE_20260927-redeem0",
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "product_id": 870927190,
+        "product_name": "MOCK积分礼品",
+        "points_price": 100,
+        "quantity": 1,
+        "total_points": 100,
+        "status": 1,
+        "pickup_store_id": 870927001,
+        "verified_at": "2026-07-22 00:00:00",
+        "created_at": "2026-07-22 00:00:00",
+        "id": 870927195,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "account_id": 870927194,
+        "type": "mock_earn",
+        "direction": "in",
+        "amount": 60,
+        "balance_before": 0,
+        "balance_after": 60,
+        "biz_key": "MOCK_SETTLE_20260927:earn:0:870927002",
+        "remark": "MOCK来源积分",
+        "created_at": "2026-07-21 00:00:00",
+        "id": 870927196,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "source_key": "MOCK_SETTLE_20260927:earn:0:870927002",
+        "source_store_id": 870927002,
+        "responsible_store_id": 870927002,
+        "face_total": 60,
+        "remaining": 0,
+        "created_at": "2026-07-21 00:00:00",
+        "id": 870927197,
+        "principal_total": 0,
+        "principal_remaining": 0,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:spend:0:870927002",
+        "batch_id": 870927197,
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "reference": "redeem:870927195",
+        "expense_key": "redeem:870927195",
+        "store_id": 870927001,
+        "amount": 60,
+        "state": "consumed",
+        "created_at": "2026-07-22 00:00:00",
+        "id": 870927198,
+        "principal": 0
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "account_id": 870927194,
+        "type": "mock_earn",
+        "direction": "in",
+        "amount": 40,
+        "balance_before": 60,
+        "balance_after": 100,
+        "biz_key": "MOCK_SETTLE_20260927:earn:0:870927003",
+        "remark": "MOCK来源积分",
+        "created_at": "2026-07-21 00:00:00",
+        "id": 870927199,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "source_key": "MOCK_SETTLE_20260927:earn:0:870927003",
+        "source_store_id": 870927003,
+        "responsible_store_id": 870927003,
+        "face_total": 40,
+        "remaining": 0,
+        "created_at": "2026-07-21 00:00:00",
+        "id": 870927200,
+        "principal_total": 0,
+        "principal_remaining": 0,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:spend:0:870927003",
+        "batch_id": 870927200,
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "reference": "redeem:870927195",
+        "expense_key": "redeem:870927195",
+        "store_id": 870927001,
+        "amount": 40,
+        "state": "consumed",
+        "created_at": "2026-07-22 00:00:00",
+        "id": 870927201,
+        "principal": 0
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u10",
+        "account_id": 870927194,
+        "type": "redeem",
+        "direction": "out",
+        "amount": 100,
+        "balance_before": 100,
+        "balance_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:spent:0",
+        "related_redeem_order_id": 870927195,
+        "remark": "MOCK积分消费",
+        "created_at": "2026-07-22 00:00:00",
+        "id": 870927202,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_expenses",
+      "values": {
+        "expense_key": "redeem:870927195",
+        "kind": "redeem",
+        "source_id": 870927195,
+        "created_at": "2026-07-22 00:00:00",
+        "completed_at": "2026-07-22 00:00:00",
+        "amount": 10000,
+        "provider_id": 870927001,
+        "status": "ready",
+        "note": "MOCK成本已核对",
+        "id": 870927203
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927021,
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "nick_name": "MOCK-积分场景1",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_accounts",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "balance": 0,
+        "status": 0,
+        "id": 870927205,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "account_id": 870927205,
+        "type": "mock_earn",
+        "direction": "in",
+        "amount": 100,
+        "balance_before": 0,
+        "balance_after": 100,
+        "biz_key": "MOCK_SETTLE_20260927:earn:1:870927003",
+        "remark": "MOCK来源积分",
+        "created_at": "2026-07-22 00:00:00",
+        "id": 870927206,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "source_key": "MOCK_SETTLE_20260927:earn:1:870927003",
+        "source_store_id": 870927003,
+        "responsible_store_id": 870927003,
+        "face_total": 100,
+        "remaining": 0,
+        "created_at": "2026-07-22 00:00:00",
+        "id": 870927207,
+        "principal_total": 0,
+        "principal_remaining": 0,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:spend:1:870927003",
+        "batch_id": 870927207,
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "reference": "raffle:870927191",
+        "expense_key": "raffle:870927191",
+        "store_id": 870927002,
+        "amount": 100,
+        "state": "consumed",
+        "created_at": "2026-07-23 00:00:00",
+        "id": 870927208,
+        "principal": 0
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "account_id": 870927205,
+        "type": "raffle",
+        "direction": "out",
+        "amount": 100,
+        "balance_before": 100,
+        "balance_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:spent:1",
+        "related_redeem_order_id": null,
+        "remark": "MOCK积分消费",
+        "created_at": "2026-07-23 00:00:00",
+        "id": 870927209,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_expenses",
+      "values": {
+        "expense_key": "raffle:870927191",
+        "kind": "raffle",
+        "source_id": 870927191,
+        "created_at": "2026-07-23 00:00:00",
+        "completed_at": "2026-07-23 00:00:00",
+        "amount": 30000,
+        "provider_id": 870927002,
+        "status": "ready",
+        "note": "MOCK成本已核对",
+        "id": 870927210
+      }
+    },
+    {
+      "table": "raffle_entries",
+      "values": {
+        "created_at": "2026-07-23 00:00:00",
+        "updated_at": "2026-07-23 00:00:00",
+        "raffle_id": 870927191,
+        "user_id": 870927021,
+        "number": 1,
+        "open_id": "MOCK_SETTLE_20260927_u11",
+        "nick_name": "MOCK-积分场景1",
+        "avatar": "",
+        "points_paid": 100,
+        "subscribed": 0,
+        "prize_id": 870927192,
+        "id": 870927211
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927022,
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "nick_name": "MOCK-积分场景2",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_accounts",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "balance": 0,
+        "status": 0,
+        "id": 870927213,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_redeem_orders",
+      "values": {
+        "order_no": "MOCK_SETTLE_20260927-redeem2",
+        "request_key": "MOCK_SETTLE_20260927-redeem2",
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "product_id": 870927190,
+        "product_name": "MOCK积分礼品",
+        "points_price": 100,
+        "quantity": 1,
+        "total_points": 100,
+        "status": 1,
+        "pickup_store_id": 870927001,
+        "verified_at": "2026-07-24 00:00:00",
+        "created_at": "2026-07-24 00:00:00",
+        "id": 870927214,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "account_id": 870927213,
+        "type": "mock_earn",
+        "direction": "in",
+        "amount": 100,
+        "balance_before": 0,
+        "balance_after": 100,
+        "biz_key": "MOCK_SETTLE_20260927:earn:2:870927003",
+        "remark": "MOCK来源积分",
+        "created_at": "2026-07-23 00:00:00",
+        "id": 870927215,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "source_key": "MOCK_SETTLE_20260927:earn:2:870927003",
+        "source_store_id": 870927003,
+        "responsible_store_id": 870927003,
+        "face_total": 100,
+        "remaining": 0,
+        "created_at": "2026-07-23 00:00:00",
+        "id": 870927216,
+        "principal_total": 0,
+        "principal_remaining": 0,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:spend:2:870927003",
+        "batch_id": 870927216,
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "reference": "redeem:870927214",
+        "expense_key": "redeem:870927214",
+        "store_id": 870927001,
+        "amount": 100,
+        "state": "consumed",
+        "created_at": "2026-07-24 00:00:00",
+        "id": 870927217,
+        "principal": 0
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u12",
+        "account_id": 870927213,
+        "type": "redeem",
+        "direction": "out",
+        "amount": 100,
+        "balance_before": 100,
+        "balance_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:spent:2",
+        "related_redeem_order_id": 870927214,
+        "remark": "MOCK积分消费",
+        "created_at": "2026-07-24 00:00:00",
+        "id": 870927218,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_expenses",
+      "values": {
+        "expense_key": "redeem:870927214",
+        "kind": "redeem",
+        "source_id": 870927214,
+        "created_at": "2026-07-24 00:00:00",
+        "completed_at": "2026-07-24 00:00:00",
+        "amount": null,
+        "provider_id": 870927001,
+        "status": "needs_cost",
+        "note": "",
+        "id": 870927219
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927023,
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "nick_name": "MOCK-积分场景3",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_accounts",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "balance": 0,
+        "status": 0,
+        "id": 870927221,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_redeem_orders",
+      "values": {
+        "order_no": "MOCK_SETTLE_20260927-redeem3",
+        "request_key": "MOCK_SETTLE_20260927-redeem3",
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "product_id": 870927190,
+        "product_name": "MOCK积分礼品",
+        "points_price": 100,
+        "quantity": 1,
+        "total_points": 100,
+        "status": 1,
+        "pickup_store_id": 870927002,
+        "verified_at": "2026-08-10 00:00:00",
+        "created_at": "2026-08-10 00:00:00",
+        "id": 870927222,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "account_id": 870927221,
+        "type": "mock_earn",
+        "direction": "in",
+        "amount": 100,
+        "balance_before": 0,
+        "balance_after": 100,
+        "biz_key": "MOCK_SETTLE_20260927:earn:3:870927003",
+        "remark": "MOCK来源积分",
+        "created_at": "2026-08-09 00:00:00",
+        "id": 870927223,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "source_key": "MOCK_SETTLE_20260927:earn:3:870927003",
+        "source_store_id": 870927003,
+        "responsible_store_id": 870927003,
+        "face_total": 100,
+        "remaining": 0,
+        "created_at": "2026-08-09 00:00:00",
+        "id": 870927224,
+        "principal_total": 0,
+        "principal_remaining": 0,
+        "frozen": 0,
+        "legacy": false
+      }
+    },
+    {
+      "table": "settlement_allocations",
+      "values": {
+        "biz_key": "MOCK_SETTLE_20260927:spend:3:870927003",
+        "batch_id": 870927224,
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "reference": "redeem:870927222",
+        "expense_key": "redeem:870927222",
+        "store_id": 870927002,
+        "amount": 100,
+        "state": "consumed",
+        "created_at": "2026-08-10 00:00:00",
+        "id": 870927225,
+        "principal": 0
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u13",
+        "account_id": 870927221,
+        "type": "redeem",
+        "direction": "out",
+        "amount": 100,
+        "balance_before": 100,
+        "balance_after": 0,
+        "biz_key": "MOCK_SETTLE_20260927:spent:3",
+        "related_redeem_order_id": 870927222,
+        "remark": "MOCK积分消费",
+        "created_at": "2026-08-10 00:00:00",
+        "id": 870927226,
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_expenses",
+      "values": {
+        "expense_key": "redeem:870927222",
+        "kind": "redeem",
+        "source_id": 870927222,
+        "created_at": "2026-08-10 00:00:00",
+        "completed_at": "2026-08-10 00:00:00",
+        "amount": 5000,
+        "provider_id": 870927002,
+        "status": "ready",
+        "note": "MOCK成本已核对",
+        "id": 870927227
+      }
+    },
+    {
+      "table": "users",
+      "values": {
+        "id": 870927030,
+        "open_id": "MOCK_SETTLE_20260927_u20",
+        "nick_name": "MOCK-总部赠分余额",
+        "role": 0,
+        "user_type": 0,
+        "gender": 0,
+        "registered_store_id": 870927001,
+        "registered_store_source": "mock",
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_accounts",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u20",
+        "balance": 200,
+        "status": 0,
+        "id": 870927229,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "point_transactions",
+      "values": {
+        "open_id": "MOCK_SETTLE_20260927_u20",
+        "account_id": 870927229,
+        "type": "mock_earn",
+        "direction": "in",
+        "amount": 200,
+        "balance_before": 0,
+        "balance_after": 200,
+        "biz_key": "MOCK_SETTLE_20260927:hq-points",
+        "remark": "MOCK总部活动赠分",
+        "id": 870927230,
+        "created_at": "2026-07-01 00:00:00",
+        "updated_at": "2026-07-01 00:00:00"
+      }
+    },
+    {
+      "table": "settlement_batches",
+      "values": {
+        "kind": "point",
+        "open_id": "MOCK_SETTLE_20260927_u20",
+        "source_key": "MOCK_SETTLE_20260927:hq-points",
+        "source_store_id": 0,
+        "responsible_store_id": 0,
+        "face_total": 200,
+        "remaining": 200,
+        "id": 870927231,
+        "created_at": "2026-07-01 00:00:00",
+        "principal_total": 0,
+        "principal_remaining": 0,
+        "frozen": 0,
+        "legacy": false
+      }
+    }
+  ],
+  "fixes": [
+    [
+      "settlement_card_usages",
+      870927161,
+      {
+        "status": "valid",
+        "note": "MOCK核验通过"
+      }
+    ],
+    [
+      "settlement_card_remittances",
+      870927176,
+      {
+        "status": "confirmed",
+        "payment_ref": "MOCK演练凭证",
+        "submitted_at": "2026-07-01 00:00:00",
+        "confirmed_at": "2026-07-01 00:00:00"
+      }
+    ],
+    [
+      "settlement_expenses",
+      870927219,
+      {
+        "amount": 15000,
+        "status": "ready",
+        "note": "MOCK确认成本150元"
+      }
+    ]
+  ],
+  "counts": {
+    "stores": 4,
+    "settlement_periods": 2,
+    "users": 12,
+    "dishes": 1,
+    "play_orders": 15,
+    "pay_orders": 15,
+    "caterings": 2,
+    "catering_items": 2,
+    "refund_requests": 4,
+    "wallet_accounts": 1,
+    "wallet_recharge_orders": 2,
+    "wallet_transactions": 7,
+    "settlement_batches": 8,
+    "settlement_allocations": 8,
+    "settlement_entries": 3,
+    "month_card_orders": 5,
+    "settlement_card_pools": 5,
+    "settlement_card_usages": 7,
+    "settlement_card_remittances": 1,
+    "point_product_categories": 1,
+    "point_products": 1,
+    "raffles": 1,
+    "raffle_prizes": 1,
+    "point_accounts": 5,
+    "point_redeem_orders": 3,
+    "point_transactions": 10,
+    "settlement_expenses": 4,
+    "raffle_entries": 1
+  },
+  "labels": {
+    "july-play": {
+      "table": "pay_orders",
+      "id": 870927111
+    },
+    "july-food": {
+      "table": "pay_orders",
+      "id": 870927114
+    },
+    "same-month-refund": {
+      "table": "pay_orders",
+      "id": 870927116
+    },
+    "cross-month-refund": {
+      "table": "pay_orders",
+      "id": 870927119
+    },
+    "zero-net": {
+      "table": "pay_orders",
+      "id": 870927122
+    },
+    "aug-play": {
+      "table": "pay_orders",
+      "id": 870927125
+    },
+    "aug-food": {
+      "table": "pay_orders",
+      "id": 870927128
+    },
+    "unpaid-excluded": {
+      "table": "pay_orders",
+      "id": 870927130
+    },
+    "mixed": {
+      "table": "pay_orders",
+      "id": 870927143
+    },
+    "cross-batch": {
+      "table": "pay_orders",
+      "id": 870927145
+    },
+    "voucher": {
+      "table": "settlement_card_remittances",
+      "id": 870927176
+    },
+    "cost0": {
+      "table": "settlement_expenses",
+      "id": 870927203
+    },
+    "cost1": {
+      "table": "settlement_expenses",
+      "id": 870927210
+    },
+    "cost2": {
+      "table": "settlement_expenses",
+      "id": 870927219
+    },
+    "cost3": {
+      "table": "settlement_expenses",
+      "id": 870927227
+    }
+  }
+}

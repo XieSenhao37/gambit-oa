@@ -1,0 +1,18 @@
+const fs = require('fs');
+const ts = require('typescript');
+const vm = require('vm');
+const assert = require('node:assert/strict');
+const pages = require('../src/config/pages.json');
+const output = ts.transpileModule(fs.readFileSync(require.resolve('../src/config/menu.ts'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;
+const context = { exports: {}, require: () => pages };
+vm.runInNewContext(output, context);
+const menu = ids => JSON.parse(JSON.stringify(context.exports.getGroupedMenuData(ids)));
+assert.deepEqual(menu([]), []);
+assert.deepEqual(menu(['orders']), [{path:'/order-center',name:'订单中心',children:[{path:'/orders',name:'历史游玩订单'}]}]);
+const full = menu(pages.map(p => p.id));
+assert.deepEqual(full.map(p=>p.name), ['工作台','数据仪表盘','订单中心','餐饮','卡牌','储值','积分','基础管理','财务结算']);
+const leaves = full.flatMap(p=>p.children || [p]).map(p=>p.path);
+assert.equal(leaves.length, pages.length);
+assert.equal(new Set(leaves).size,pages.length);
+assert.ok(!JSON.stringify(menu(pages.filter(p=>p.scope!=='admin').map(p=>p.id))).includes('/staff-access'));
+console.log('Grouped menu and permission filtering checks passed');

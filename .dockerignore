@@ -1,0 +1,17 @@
+.git
+.idea
+.DS_Store
+
+backend/.env
+backend/__pycache__
+backend/**/*.pyc
+backend/.venv
+
+frontend/node_modules
+frontend/dist
+frontend/dist.zip
+
+.knowledge
+
+.env*
+**/.git
