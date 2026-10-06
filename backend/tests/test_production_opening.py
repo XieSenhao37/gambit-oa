@@ -71,6 +71,25 @@ class ProductionOpeningTest(unittest.TestCase):
         self.assertEqual(pools[1].starts_at,datetime(2026,10,20,12))
         self.assertEqual(sum(cards.window(p,m)[2] for p in pools for m in ['2026-10','2026-11'] if cards.window(p,m)),first+39900)
 
+    def test_legacy_callback_seconds_use_existing_expiry_and_reject_other_drift(self):
+        start=datetime(2026,10,1,12)
+        self.card(start)
+        order=MonthCardOrder.query.one();order.duration_days=0;order.effective_at=None
+        user=User.query.filter_by(open_id='p').one()
+        user.month_card_expire=datetime(2026,11,1,12,0,2)
+        db.session.commit()
+        with self.assertRaisesRegex(ValueError,'无法对应原始卡期'):
+            initialize(self.cutoff,1,'prospective')
+        db.session.rollback()
+        output=initialize(self.cutoff,1,'prospective',legacy_card_end_tolerance_seconds=2)
+        self.assertEqual(output['AdjustedCardEndUserIds'],[user.id])
+        self.assertEqual(SettlementCardPool.query.one().ends_at,user.month_card_expire)
+        db.session.rollback()
+        user.month_card_expire=datetime(2026,11,1,12,0,3);db.session.commit()
+        with self.assertRaisesRegex(ValueError,'无法对应原始卡期'):
+            initialize(self.cutoff,1,'prospective',legacy_card_end_tolerance_seconds=2)
+        db.session.rollback()
+
     def test_wallet_discount_ratio_points_nanshan_and_preview_rollback(self):
         at=datetime(2026,9,1)
         db.session.add_all([WalletAccount(id=1,open_id='p',balance=60000,frozen_balance=0),

@@ -94,8 +94,9 @@ def point_opening(cutoff,nanshan):
     return count
 
 
-def card_opening(cutoff,nanshan,policy,manifest):
+def card_opening(cutoff,nanshan,policy,manifest,end_tolerance_seconds=0,adjusted_users=None):
     if policy not in ('full-period','prospective'):raise ValueError('必须明确跨期旧月卡的分配政策')
+    if end_tolerance_seconds not in (0, 1, 2):raise ValueError('旧月卡时间差容差最多2秒')
     imported=0
     for user in User.query.filter(User.deleted_at.is_(None),User.month_card_expire>cutoff):
         orders=MonthCardOrder.query.filter_by(open_id=user.open_id,settle_status=1).filter(MonthCardOrder.deleted_at.is_(None),MonthCardOrder.created_at<cutoff).order_by(MonthCardOrder.id).all()
@@ -105,9 +106,15 @@ def card_opening(cutoff,nanshan,policy,manifest):
             paid_at=(pay.pay_end_time if pay else None) or order.created_at
             start=order.effective_at or max(paid_at,previous_end or paid_at)
             previous_end=term_boundary(order,start,order.open_period)
+            adjust_end=(policy=='prospective' and order is orders[-1] and not order.duration_days and not order.effective_at
+                and 0 < (user.month_card_expire-previous_end).total_seconds() <= end_tolerance_seconds)
+            if adjust_end:
+                previous_end=user.month_card_expire
+                if adjusted_users is not None:adjusted_users.append(user.id)
             amounts=apportion(order.amount,{i:1 for i in range(order.open_period)})
             for i in range(order.open_period):
                 begin,end=term_boundary(order,start,i),term_boundary(order,start,i+1)
+                if adjust_end and i==order.open_period-1:end=user.month_card_expire
                 if end<=cutoff:continue
                 key=f'card:{order.id}:{i}';item=manifest.get(key,{})
                 # New production opening assigns legacy source and responsibility to Nanshan.
@@ -138,7 +145,7 @@ def card_opening(cutoff,nanshan,policy,manifest):
     return imported
 
 
-def initialize(cutoff,wallet_payer,card_policy,manifest=None):
+def initialize(cutoff,wallet_payer,card_policy,manifest=None,legacy_card_end_tolerance_seconds=0):
     old=db.session.get(SettlementControl,1)
     if old and old.initialized_at:
         if old.cutoff!=cutoff or old.legacy_wallet_payer!=wallet_payer or old.legacy_card_policy!=card_policy:raise ValueError('已初始化，不能换规则重跑')
@@ -153,7 +160,9 @@ def initialize(cutoff,wallet_payer,card_policy,manifest=None):
     # Never blend a fresh opening with an existing/partial settlement book.
     for cls in (SettlementBatch,SettlementAllocation,SettlementCardPool,SettlementCardUsage,SettlementCardPeriod,SettlementExpense,SettlementEntry,SettlementReport,SettlementStatement,SettlementPeriod):
         if cls.query.first():raise ValueError('结算账已有记录，不能覆盖或混合初始化；请先核对迁移状态')
-    counts={'WalletAccounts':wallet_opening(cutoff,store.id,wallet_payer),'PointAccounts':point_opening(cutoff,store.id),'CardPools':card_opening(cutoff,store.id,card_policy,manifest or {})}
+    adjusted_users=[]
+    counts={'WalletAccounts':wallet_opening(cutoff,store.id,wallet_payer),'PointAccounts':point_opening(cutoff,store.id),'CardPools':card_opening(cutoff,store.id,card_policy,manifest or {},legacy_card_end_tolerance_seconds,adjusted_users)}
+    counts.update(LegacyCardEndToleranceSeconds=legacy_card_end_tolerance_seconds,AdjustedCardEndUserIds=adjusted_users)
     control=old or SettlementControl(id=1)
     control.cutoff=cutoff;control.legacy_wallet_payer=wallet_payer;control.legacy_card_policy=card_policy;control.initialized_at=now();db.session.add(control);db.session.flush()
     counts.update(FirstSettlementMonth=cutoff.strftime('%Y-%m'),CardPolicy=card_policy,HistoricalEntries=0,WalletFace=sum(x.remaining for x in SettlementBatch.query.filter_by(kind='wallet')),WalletPrincipal=sum(x.principal_remaining for x in SettlementBatch.query.filter_by(kind='wallet')),Points=sum(x.remaining for x in SettlementBatch.query.filter_by(kind='point')),Cutoff=str(cutoff))

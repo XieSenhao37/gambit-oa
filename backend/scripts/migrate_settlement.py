@@ -20,6 +20,7 @@ parser.add_argument('--legacy-card-policy',choices=['full-period','prospective']
 parser.add_argument('--card-manifest',type=Path)
 parser.add_argument('--maintenance-confirmed',action='store_true')
 parser.add_argument('--report',type=Path,required=True)
+parser.add_argument('--legacy-card-end-tolerance-seconds',type=int,choices=[0,1,2],default=0,help='仅旧无卡期快照月卡，允许回调比支付晚至多2秒，沿用玩家实际到期日')
 parser.add_argument('--production-launch',action='store_true',help='正式首次上线目标及口径校验')
 args=parser.parse_args()
 if args.mode!='schema' and not args.cutoff:parser.error('preview/apply 必须明确维护窗口真实 --cutoff')
@@ -76,7 +77,7 @@ with app.app_context():
                 lock_connection=db.engine.connect()
                 locked=lock_connection.execute(text("SELECT GET_LOCK('gambit_settlement_opening', 0)")).scalar()
                 if locked!=1:raise RuntimeError('另一个期初初始化正在执行')
-            output=initialize(cutoff,payer,args.legacy_card_policy,manifest)
+            output=initialize(cutoff,payer,args.legacy_card_policy,manifest,args.legacy_card_end_tolerance_seconds)
             # Report carries balances/counts, never credentials or customer identifiers.
             output.update(Mode=args.mode,Host=uri.host,Database=uri.database,LegacyWalletPayer=args.legacy_wallet_payer,LegacyCardPolicy=args.legacy_card_policy)
             args.report.write_text(json.dumps(output,ensure_ascii=False,indent=2))
