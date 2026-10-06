@@ -1,0 +1,51 @@
+{
+  "users": {
+    "rows": 5185,
+    "unchanged": true
+  },
+  "wallet_accounts": {
+    "rows": 1436,
+    "unchanged": true
+  },
+  "point_accounts": {
+    "rows": 1282,
+    "unchanged": true
+  },
+  "month_card_orders": {
+    "rows": 192,
+    "unchanged": true
+  },
+  "SettlementCounts": {
+    "settlement_controls": 1,
+    "settlement_batches": 973,
+    "settlement_card_pools": 4,
+    "settlement_entries": 0,
+    "settlement_card_usages": 0,
+    "settlement_reports": 0
+  },
+  "OpeningControls": [
+    {
+      "id": 1,
+      "cutoff": "2026-10-06 22:39:36",
+      "initialized_at": "2026-10-06 23:06:31",
+      "legacy_wallet_payer": 1,
+      "legacy_card_policy": "prospective"
+    }
+  ],
+  "BatchTotals": [
+    {
+      "kind": "point",
+      "remaining": "10702",
+      "principal": "0",
+      "frozen": "0"
+    },
+    {
+      "kind": "wallet",
+      "remaining": "237980",
+      "principal": "206490",
+      "frozen": "0"
+    }
+  ],
+  "NonNanshanLegacyBatches": 0,
+  "NonNanshanLegacyCards": 0
+}

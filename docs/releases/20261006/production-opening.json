@@ -1,0 +1,25 @@
+{
+  "WalletAccounts": 1436,
+  "PointAccounts": 1282,
+  "CardPools": 4,
+  "LegacyCardEndToleranceSeconds": 2,
+  "AdjustedCardEndUserIds": [
+    2366,
+    3015,
+    4574,
+    4867
+  ],
+  "FirstSettlementMonth": "2026-10",
+  "CardPolicy": "prospective",
+  "HistoricalEntries": 0,
+  "WalletFace": 237980,
+  "WalletPrincipal": 206490,
+  "Points": 10702,
+  "Cutoff": "2026-10-06 22:39:36",
+  "Mode": "apply",
+  "Host": "sh-cynosdbmysql-grp-a7usn35k.sql.tencentcdb.com",
+  "Database": "gambit",
+  "LegacyWalletPayer": "nanshan",
+  "LegacyCardPolicy": "prospective",
+  "Committed": true
+}
