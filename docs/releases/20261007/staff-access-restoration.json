@@ -1,0 +1,40 @@
+{
+  "Date": "2026-10-07",
+  "HeadquartersUserIds": [
+    1,
+    12,
+    15,
+    16,
+    28
+  ],
+  "WorkerUserIds": [
+    17,
+    18,
+    19,
+    27,
+    45,
+    72,
+    87,
+    172,
+    224,
+    457,
+    2741,
+    2800,
+    3315,
+    3402,
+    3422,
+    3484,
+    3681,
+    3801,
+    4272,
+    4353
+  ],
+  "WorkerStoreIds": [
+    1,
+    2
+  ],
+  "AccountsVerified": 25,
+  "GrantsVerified": 40,
+  "MIEIdentityConfirmedByUser": true,
+  "Scope": "staff authorization only; original roles, phones, assets and monthly card rights unchanged"
+}

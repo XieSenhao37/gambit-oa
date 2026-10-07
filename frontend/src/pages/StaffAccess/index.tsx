@@ -140,7 +140,6 @@ export default function StaffAccess() {
                           <Tag color={a.Enabled ? 'green' : 'default'}>
                             {a.Enabled ? '启用' : '停用'}
                           </Tag>
-                          {!a.Verified && <Tag>待首次验证</Tag>}
                         </Space>
                       ),
                     },

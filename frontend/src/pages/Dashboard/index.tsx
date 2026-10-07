@@ -1,4 +1,5 @@
 import { Table } from '@/components/AdaptiveTable';
+import InteractiveChart from '@/components/InteractiveChart';
 import StoreSwitcher from '@/components/StoreSwitcher';
 import {
   getCateringOverview,
@@ -37,6 +38,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  type ReactElement,
   type ReactNode,
 } from 'react';
 import {
@@ -49,7 +51,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -69,6 +70,14 @@ const PIE_COLORS = [
   '#11132B',
   '#6E7CB8',
 ];
+
+const OPS_SERIES = [
+  { key: 'Revenue', name: '总营收', color: BRAND_BLUE, axis: 'left' },
+  { key: 'PlayRevenue', name: '桌游营收', color: '#11132B', axis: 'left' },
+  { key: 'CateringRevenue', name: '饮品营收', color: '#7FA0FF', axis: 'left' },
+  { key: 'OrderCount', name: '订单数', color: '#FA8C16', axis: 'right' },
+  { key: 'NewUsers', name: '新增用户', color: '#6E7CB8', axis: 'right' },
+] as const;
 
 type RangePreset = 'today' | 'yesterday' | '7d' | '30d' | 'custom';
 type Granularity = 'day' | 'week' | 'month';
@@ -140,7 +149,20 @@ const moneyAwareTooltip = (
     label.includes('营收') || label.includes('金额') || label.includes('收入');
   return shouldFormatAsMoney
     ? [yuanTooltip(value), label]
-    : [toNumber(value), label];
+    : [
+        `${toNumber(value).toLocaleString('zh-CN')}${
+          label.includes('小时')
+            ? '小时'
+            : label.includes('用户')
+            ? '人'
+            : label.includes('出杯')
+            ? '杯'
+            : label.includes('订单') || label.includes('开通')
+            ? '单'
+            : ''
+        }`,
+        label,
+      ];
 };
 
 const Dashboard = () => {
@@ -282,9 +304,10 @@ const Dashboard = () => {
   ) => (
     <Card title={title} extra={extra} bodyStyle={{ height: 320 }}>
       {hasData ? (
-        <ResponsiveContainer width="100%" height="100%">
-          {chart as any}
-        </ResponsiveContainer>
+        <InteractiveChart
+          chart={chart as ReactElement}
+          initialSelection={title === '经营趋势' ? 'Revenue' : 'all'}
+        />
       ) : (
         <div
           style={{
@@ -452,55 +475,22 @@ const Dashboard = () => {
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="Date" />
-          <YAxis yAxisId="left" />
+          <YAxis yAxisId="left" unit="元" />
           <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
           <Tooltip formatter={moneyAwareTooltip} />
           <Legend />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="Revenue"
-            name="总营收"
-            stroke={BRAND_BLUE}
-            strokeWidth={2}
-            dot={false}
-          />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="PlayRevenue"
-            name="桌游营收"
-            stroke="#11132B"
-            strokeWidth={2}
-            dot={false}
-          />
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="CateringRevenue"
-            name="饮品营收"
-            stroke="#7FA0FF"
-            strokeWidth={2}
-            dot={false}
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="OrderCount"
-            name="订单数"
-            stroke="#FA8C16"
-            strokeWidth={2}
-            dot={false}
-          />
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="NewUsers"
-            name="新增用户"
-            stroke="#6E7CB8"
-            strokeWidth={2}
-            dot={false}
-          />
+          {OPS_SERIES.map((series) => (
+            <Line
+              key={series.key}
+              yAxisId={series.axis}
+              type="monotone"
+              dataKey={series.key}
+              name={series.name}
+              stroke={series.color}
+              strokeWidth={2}
+              dot={false}
+            />
+          ))}
         </LineChart>,
       )}
     </Space>
@@ -713,7 +703,7 @@ const Dashboard = () => {
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="Date" />
-          <YAxis yAxisId="left" />
+          <YAxis yAxisId="left" unit="元" />
           <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
           <Tooltip formatter={moneyAwareTooltip} />
           <Legend />
@@ -885,8 +875,14 @@ const Dashboard = () => {
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="Date" />
-          <YAxis yAxisId="left" />
-          <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
+          <YAxis yAxisId="left" unit="元" />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            allowDecimals={false}
+            unit="单"
+          />
+          <YAxis yAxisId="hours" orientation="right" unit="小时" />
           <Tooltip formatter={moneyAwareTooltip} />
           <Legend />
           <Line
@@ -908,7 +904,7 @@ const Dashboard = () => {
             dot={false}
           />
           <Line
-            yAxisId="right"
+            yAxisId="hours"
             type="monotone"
             dataKey="TotalPlayHours"
             name="游玩小时"
@@ -1026,16 +1022,24 @@ const Dashboard = () => {
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="Date" />
-              <YAxis />
+              <YAxis yAxisId="money" unit="元" />
+              <YAxis
+                yAxisId="count"
+                orientation="right"
+                allowDecimals={false}
+                unit="单"
+              />
               <Tooltip formatter={moneyAwareTooltip} />
               <Legend />
               <Bar
+                yAxisId="money"
                 dataKey="Revenue"
                 name="月卡收入"
                 fill={BRAND_BLUE}
                 radius={[4, 4, 0, 0]}
               />
               <Bar
+                yAxisId="count"
                 dataKey="OpenCount"
                 name="开通数"
                 fill="#7FA0FF"
@@ -1054,7 +1058,7 @@ const Dashboard = () => {
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="Date" />
-              <YAxis />
+              <YAxis unit="元" />
               <Tooltip formatter={moneyAwareTooltip} />
               <Legend />
               <Bar
