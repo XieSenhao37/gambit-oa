@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from app.api.v1.play_pricing import play_pricing_bp
 from app.api.v1.banner import banner_bp
 from app.api.v1.promotion import promotion_bp
 from app.api.v1.event import event_bp
@@ -22,6 +23,7 @@ main = Blueprint('main', __name__)
 api_v1 = Blueprint('api_v1', __name__, url_prefix='/admin_api')
 
 # 注册各个模块的路由
+api_v1.register_blueprint(play_pricing_bp, url_prefix="/play-pricing/v1")
 api_v1.register_blueprint(banner_bp, url_prefix="/banner/v1")
 api_v1.register_blueprint(promotion_bp, url_prefix="/promotion/v1")
 api_v1.register_blueprint(event_bp, url_prefix="/event/v1")

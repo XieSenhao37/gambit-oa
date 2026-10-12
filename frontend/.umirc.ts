@@ -40,8 +40,6 @@ export default defineConfig({
     dataField: 'data',
   },
   mock: false,
-  extraBabelPlugins:
-    process.env.NODE_ENV === 'production'
-      ? ['babel-plugin-dynamic-import-node']
-      : [],
+  hash: true,
+  codeSplitting: { jsStrategy: 'granularChunks' },
 });

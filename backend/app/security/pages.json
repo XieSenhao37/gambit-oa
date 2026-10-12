@@ -210,5 +210,16 @@
       "id": "finance-center",
       "name": "财务结算"
     }
+  },
+  {
+    "id": "play-pricing",
+    "path": "/play-pricing",
+    "name": "桌游计价管理",
+    "component": "./PlayPricing",
+    "scope": "store",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
   }
 ]
