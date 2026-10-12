@@ -107,7 +107,9 @@ export const request: RequestConfig = {
   ],
   errorConfig: {
     // 错误处理
-    errorHandler: (error: any) => {
+    errorHandler: (error: any, options) => {
+      if (options.skipErrorHandler && error.response?.status !== 401)
+        throw error;
       // 处理业务错误码
       if (error.response) {
         // 服务器返回了错误响应

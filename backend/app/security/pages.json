@@ -190,6 +190,17 @@
     }
   },
   {
+    "id": "month-card-open",
+    "path": "/month-card-open",
+    "name": "开通月卡",
+    "component": "./MonthCardOpen",
+    "scope": "admin",
+    "group": {
+      "id": "base-center",
+      "name": "基础管理"
+    }
+  },
+  {
     "id": "staff-access",
     "path": "/staff-access",
     "name": "员工及门店授权管理",

@@ -6,8 +6,8 @@ import uuid
 from datetime import datetime, timedelta
 from unittest.mock import patch
 from app import create_app, db
-from app.models import Config, Store, User, MonthCardOrder, PlayOrder
-from app.security.models import StaffAccount, StaffGrant, OASession
+from app.models import Config, Store, User, MonthCardOrder, PlayOrder, PayOrder
+from app.security.models import StaffAccount, StaffGrant, OASession, AccessAudit
 from app.utils.crypto import encrypt_phone
 from app.settlement.models import *
 from app.settlement import service
@@ -39,15 +39,167 @@ class MonthlyCardsTest(unittest.TestCase):
     def usage(self,p,start,store=1,seconds=3600,status='valid'):
         u=SettlementCardUsage(pool_id=p.id,play_order_id=SettlementCardUsage.query.count()+1,store_id=store,started_at=start,ended_at=start+timedelta(seconds=seconds),seconds=seconds,status=status,note='');db.session.add(u);db.session.flush();return u
 
-    def test_manual_open_removed_and_config_permissions_retained(self):
+    def open_card(self, **changes):
+        data=dict(UserId=3,OpenMonths=1,ExpectedPrice=39900,RequestKey=str(uuid.uuid4()))
+        data.update(changes)
+        return self.post('month-card/v1/manual-open', data)
+
+    def test_manual_open_is_headquarters_only_and_rejects_channel_override(self):
         before = db.session.get(User,3).month_card_expire
         for source in ('gift', 'third_party', 'wechat'):
-            response=self.post('month-card/v1/manual-open',dict(UserId=3,Source=source,OpenMonths=1))
-            self.assertEqual(response.status_code,404)
+            self.assertEqual(self.open_card(Source=source).status_code,400)
+        self.assertEqual(self.post('month-card/v1/manual-open',dict(UserId=3,OpenMonths=1,
+            ExpectedPrice=39900,RequestKey=str(uuid.uuid4())),2,2).status_code,403)
+        self.assertEqual(self.client.post('/admin_api/month-card/v1/manual-open',json={}).status_code,401)
         self.assertEqual(MonthCardOrder.query.count(),0)
         self.assertEqual(SettlementCardPool.query.count(),0)
         self.assertEqual(db.session.get(User,3).month_card_expire,before)
         self.assertEqual(self.post('month-card/v1/config',dict(Price=49900,ExpectedPrice=39900,Note='无权限'),2,2).status_code,403)
+
+    def test_manual_open_fixed_terms_hq_pools_no_payment_or_remittance(self):
+        at=datetime(2026,1,31,12)
+        with patch('app.api.v1.month_card._now',return_value=at.replace(microsecond=750000)):
+            response=self.open_card(OpenMonths=2)
+        self.assertEqual(response.status_code,200,response.json)
+        order=MonthCardOrder.query.one()
+        self.assertEqual((order.source,order.open_type,order.settle_status,order.amount,order.duration_days),
+                         ('gift',2,1,79800,60))
+        self.assertEqual(order.operator,'1')
+        self.assertEqual(db.session.get(User,3).month_card_expire,at+timedelta(days=60))
+        pools=SettlementCardPool.query.order_by(SettlementCardPool.starts_at).all()
+        self.assertEqual(len(pools),2)
+        self.assertTrue(all(p.payer_id==0 and p.amount==39900 for p in pools))
+        self.assertEqual(pools[0].starts_at,at)
+        self.assertEqual(pools[0].ends_at,pools[1].starts_at)
+        self.assertEqual(pools[1].ends_at,at+timedelta(days=60))
+        self.assertEqual(PayOrder.query.count(),0)
+        self.assertEqual(SettlementCardRemittance.query.count(),0)
+        self.assertEqual(AccessAudit.query.filter_by(action='month-card:manual-open').count(),1)
+
+    def test_manual_renewal_starts_at_existing_expiry_or_now(self):
+        at=datetime(2026,1,31,12)
+        user=db.session.get(User,3)
+        user.month_card_expire=at+timedelta(days=5);db.session.commit()
+        with patch('app.api.v1.month_card._now',return_value=at):
+            self.assertEqual(self.open_card().status_code,200)
+        self.assertEqual(user.month_card_expire,at+timedelta(days=35))
+        user.month_card_expire=at-timedelta(days=5);db.session.commit()
+        with patch('app.api.v1.month_card._now',return_value=at):
+            self.assertEqual(self.open_card().status_code,200)
+        self.assertEqual(user.month_card_expire,at+timedelta(days=30))
+
+    def test_manual_retry_after_price_change_or_store_switch_does_not_extend(self):
+        key=str(uuid.uuid4())
+        first=self.open_card(RequestKey=key)
+        before=db.session.get(User,3).month_card_expire
+        row=Config.query.filter_by(config_key='MonthCardConfig').one()
+        row.config_value={'CommonPrice':49900};db.session.commit()
+        second=self.post('month-card/v1/manual-open',dict(UserId=3,OpenMonths=1,
+            ExpectedPrice=39900,RequestKey=key),store=2)
+        self.assertEqual(second.status_code,200,second.json)
+        self.assertEqual(first.json['Data']['Id'],second.json['Data']['Id'])
+        self.assertEqual(db.session.get(User,3).month_card_expire,before)
+        self.assertEqual(MonthCardOrder.query.count(),1)
+        self.assertEqual(SettlementCardPool.query.count(),1)
+        self.assertEqual(self.open_card(RequestKey=key,OpenMonths=2).status_code,400)
+        self.assertEqual(self.open_card(RequestKey=key,UserId=2).status_code,400)
+
+    def test_manual_open_rejects_invalid_parameters_and_stale_price_atomically(self):
+        for changes in [dict(UserId=True),dict(UserId=999),dict(OpenMonths=0),dict(OpenMonths=13),
+                        dict(OpenMonths=1.5),dict(OpenMonths=True),dict(ExpectedPrice=True),
+                        dict(ExpectedPrice=49900),dict(RequestKey='bad'),dict(Amount=1),dict(StoreId=2)]:
+            self.assertEqual(self.open_card(**changes).status_code,400,changes)
+        self.assertEqual(MonthCardOrder.query.count(),0)
+        self.assertEqual(SettlementCardPool.query.count(),0)
+        self.assertIsNone(db.session.get(User,3).month_card_expire)
+
+    def test_manual_pool_failure_rolls_back_card_and_expiry(self):
+        with patch('app.api.v1.month_card.settlement.create_card_pools',side_effect=ValueError('模拟失败')):
+            self.assertEqual(self.open_card().status_code,400)
+        self.assertEqual(MonthCardOrder.query.count(),0)
+        self.assertEqual(SettlementCardPool.query.count(),0)
+        self.assertIsNone(db.session.get(User,3).month_card_expire)
+
+    def test_manual_card_is_subsidy_not_revenue_and_allocates_without_fee(self):
+        from app.api.v1.stats import _membership_summary
+        from app.settlement import fees
+        at=datetime(2026,1,1)
+        with patch('app.api.v1.month_card._now',return_value=at):
+            self.assertEqual(self.open_card().status_code,200)
+        summary=_membership_summary(at,datetime(2026,2,1))
+        self.assertEqual(summary['Revenue'],0)
+        self.assertEqual(summary['SubsidyAmount'],399)
+        p=SettlementCardPool.query.one();self.usage(p,datetime(2026,1,5),2)
+        prepare_cards('2026-01');db.session.flush()
+        entry=SettlementEntry.query.one()
+        self.assertEqual((entry.payer_id,entry.receiver_id,entry.amount),(0,2,39900))
+        disclosure,charges=fees.calculate('2026-01',[dict(kind=entry.kind,reference=entry.reference,
+            payer_id=entry.payer_id,receiver_id=entry.receiver_id,amount=entry.amount)])
+        self.assertEqual(disclosure[0]['Fee'],0)
+        self.assertEqual(charges,[])
+
+    def batch(self, **changes):
+        data = dict(UserIds=[2,3], OpenMonths=2, ExpectedPrice=39900, RequestKey=str(uuid.uuid4()))
+        data.update(changes)
+        return self.post('month-card/v1/manual-open-batch', data)
+
+    def test_batch_opens_all_users_with_individual_expiry_and_hq_pools(self):
+        at = datetime(2026,1,31,12)
+        db.session.get(User,2).month_card_expire = at + timedelta(days=10)
+        db.session.commit()
+        with patch('app.api.v1.month_card._now', return_value=at):
+            response = self.batch()
+        self.assertEqual(response.status_code,200,response.json)
+        self.assertEqual(len(response.json['Data']['Items']),2)
+        self.assertEqual(db.session.get(User,2).month_card_expire,at+timedelta(days=70))
+        self.assertEqual(db.session.get(User,3).month_card_expire,at+timedelta(days=60))
+        self.assertEqual(MonthCardOrder.query.count(),2)
+        self.assertEqual(SettlementCardPool.query.count(),4)
+        self.assertTrue(all(p.payer_id == 0 and p.amount == 39900 for p in SettlementCardPool.query))
+        self.assertEqual(sum(o.amount for o in MonthCardOrder.query),159600)
+        self.assertEqual(PayOrder.query.count(),0)
+        self.assertEqual(SettlementCardRemittance.query.count(),0)
+
+    def test_batch_retry_keeps_identity_across_order_price_and_store_changes(self):
+        key = str(uuid.uuid4())
+        first = self.batch(RequestKey=key)
+        expiries = [db.session.get(User,uid).month_card_expire for uid in (2,3)]
+        Config.query.filter_by(config_key='MonthCardConfig').one().config_value={'CommonPrice':49900}
+        db.session.commit()
+        second = self.post('month-card/v1/manual-open-batch',dict(UserIds=[3,2],OpenMonths=2,
+            ExpectedPrice=39900,RequestKey=key),store=2)
+        self.assertEqual(second.status_code,200,second.json)
+        self.assertEqual(first.json['Data'],second.json['Data'])
+        self.assertEqual([db.session.get(User,uid).month_card_expire for uid in (2,3)],expiries)
+        for changes in [dict(UserIds=[3]),dict(UserIds=[1,2,3]),dict(OpenMonths=1),dict(ExpectedPrice=49900)]:
+            self.assertEqual(self.batch(RequestKey=key,**changes).status_code,400)
+        self.assertEqual(MonthCardOrder.query.count(),2)
+        self.assertEqual(SettlementCardPool.query.count(),4)
+
+    def test_batch_invalid_user_or_parameters_never_partially_open(self):
+        for changes in [dict(UserIds=[]),dict(UserIds=[3,3]),dict(UserIds=[3,999]),dict(UserIds=[True]),
+            dict(UserIds=3),dict(UserIds=[3]*101),dict(UserIds=[2**63]),dict(OpenMonths=13),
+            dict(ExpectedPrice=49900),dict(Source='wechat'),dict(RequestKey='bad')]:
+            self.assertEqual(self.batch(**changes).status_code,400,changes)
+        self.assertEqual(MonthCardOrder.query.count(),0)
+        self.assertTrue(all(db.session.get(User,uid).month_card_expire is None for uid in (2,3)))
+        self.assertEqual(self.post('month-card/v1/manual-open-batch',dict(UserIds=[3],OpenMonths=1,
+            ExpectedPrice=39900,RequestKey=str(uuid.uuid4())),user=2,store=2).status_code,403)
+        self.assertEqual(self.client.post('/admin_api/month-card/v1/manual-open-batch',json={}).status_code,401)
+
+    def test_batch_later_pool_failure_rolls_back_earlier_order_pool_and_expiry(self):
+        create_pools = service.create_card_pools
+        def fail_second(order, start, payer):
+            if order.open_id == 'customer':
+                raise ValueError('模拟第二位用户失败')
+            return create_pools(order,start,payer)
+        with patch('app.api.v1.month_card.settlement.create_card_pools',side_effect=fail_second):
+            response=self.batch()
+        self.assertEqual(response.status_code,400,response.json)
+        self.assertEqual(MonthCardOrder.query.count(),0)
+        self.assertEqual(SettlementCardPool.query.count(),0)
+        self.assertEqual(AccessAudit.query.filter_by(action='month-card:manual-open').count(),0)
+        self.assertTrue(all(db.session.get(User,uid).month_card_expire is None for uid in (2,3)))
 
     def test_half_term_per_month_uses_each_months_play_weights(self):
         p=self.pool();self.usage(p,datetime(2026,1,20),1,3600);self.usage(p,datetime(2026,2,5),2,7200)

@@ -37,7 +37,7 @@ export default function CardPricing() {
             : `¥${(price / 100).toFixed(2)} / 30 天`}
         </strong>
         <span>
-          月卡仅支持玩家在小程序付费开通。订单保留开卡时的配置价格，后续调价不影响已有订单。
+          玩家可在小程序付费开通，总部也可在“开通月卡”页手动开通并承担费用。订单保留开卡时的配置价格，后续调价不影响已有订单。
         </span>
         <Button
           disabled={price === null || price === undefined}

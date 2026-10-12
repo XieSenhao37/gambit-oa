@@ -44,6 +44,18 @@ class StaffSecurityTest(unittest.TestCase):
         self.assertIn('dashboard', r['Stores'][1]['Pages'])
         self.assertEqual(len(self.client.get('/admin_api/store/v1/list', headers=self.headers()).json['Data']['Items']), 2)
 
+    def test_manual_card_page_is_under_base_management_and_headquarters_only(self):
+        from app.security.policy import PAGE_MAP
+        page = PAGE_MAP['month-card-open']
+        self.assertEqual(page['group']['id'],'base-center')
+        self.assertEqual(page['scope'],'admin')
+        for uid in (1,2):
+            data=self.client.get('/admin_api/auth/v1/me',headers=self.headers(user=uid)).json['Data']
+            for store in data['Stores']:
+                self.assertEqual('month-card-open' in store['Pages'],uid==2)
+        self.assertEqual(self.client.put('/admin_api/staff-access/v1/pages/manager',
+            json={'Pages':{'month-card-open':True}},headers=self.headers(user=2)).status_code,400)
+
     def test_revocation_and_logout(self):
         db.session.get(StaffAccount, 1).enabled = False
         db.session.commit()
