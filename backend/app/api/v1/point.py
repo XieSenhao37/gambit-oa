@@ -676,7 +676,9 @@ def list_redeem_orders():
     keyword = (request.args.get('Keyword') or '').strip()
     status = request.args.get('Status', type=int)
 
-    query = PointRedeemOrder.query.filter(PointRedeemOrder.deleted_at.is_(None))
+    query = PointRedeemOrder.query.execution_options(
+        include_unassigned_point_pickups=True,
+    ).filter(PointRedeemOrder.deleted_at.is_(None))
     if keyword:
         like = f'%{keyword}%'
         matched_user_open_ids = [
