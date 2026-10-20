@@ -1,4 +1,5 @@
 import { defineConfig } from '@umijs/max';
+import { randomBytes } from 'node:crypto';
 import pages from './src/config/pages.json';
 
 export default defineConfig({
@@ -6,6 +7,9 @@ export default defineConfig({
   access: {},
   model: {},
   initialState: {},
+  metas: [
+    { name: 'oa-build-version', content: randomBytes(16).toString('hex') },
+  ],
   layout: {
     title: 'Gambit后台管理系统',
     locale: false,
@@ -15,7 +19,7 @@ export default defineConfig({
   favicons: ['/favicon.ico'],
   routes: [
     { path: '/login', component: './Login', layout: false },
-    { path: '/', redirect: '/dashboard', wrappers: ['@/wrappers/auth'] },
+    { path: '/', redirect: '/workbench', wrappers: ['@/wrappers/auth'] },
     {
       path: '/catering',
       redirect: '/workbench?tab=catering',
@@ -40,8 +44,6 @@ export default defineConfig({
     dataField: 'data',
   },
   mock: false,
-  extraBabelPlugins:
-    process.env.NODE_ENV === 'production'
-      ? ['babel-plugin-dynamic-import-node']
-      : [],
+  hash: true,
+  codeSplitting: { jsStrategy: 'granularChunks' },
 });

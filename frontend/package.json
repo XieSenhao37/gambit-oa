@@ -2,7 +2,7 @@
   "private": true,
   "author": "",
   "scripts": {
-    "build": "node scripts/sync-pages.cjs && max build",
+    "build": "node scripts/sync-pages.cjs && max build && node scripts/write-version.cjs && node scripts/precompress.cjs",
     "dev": "node scripts/sync-pages.cjs && max dev",
     "format": "prettier --cache --write .",
     "postinstall": "node scripts/sync-pages.cjs && max setup",

@@ -7,16 +7,9 @@
     "scope": "store"
   },
   {
-    "id": "dashboard",
-    "path": "/dashboard",
-    "name": "数据仪表盘",
-    "component": "./Dashboard",
-    "scope": "store"
-  },
-  {
     "id": "orders",
     "path": "/orders",
-    "name": "历史游玩订单",
+    "name": "游玩订单",
     "component": "./Orders",
     "scope": "store",
     "group": {
@@ -27,8 +20,30 @@
   {
     "id": "catering-orders",
     "path": "/catering-orders",
-    "name": "历史餐饮订单",
+    "name": "餐饮订单",
     "component": "./CateringOrders",
+    "scope": "store",
+    "group": {
+      "id": "order-center",
+      "name": "订单中心"
+    }
+  },
+  {
+    "id": "game-service-orders",
+    "path": "/game-service-orders",
+    "name": "桌游租售订单",
+    "component": "./GameServiceOrders",
+    "scope": "store",
+    "group": {
+      "id": "order-center",
+      "name": "订单中心"
+    }
+  },
+  {
+    "id": "point-redeem-orders",
+    "path": "/point-redeem-orders",
+    "name": "积分兑换订单",
+    "component": "./PointRedeemOrders",
     "scope": "store",
     "group": {
       "id": "order-center",
@@ -47,6 +62,61 @@
     }
   },
   {
+    "id": "games",
+    "path": "/games",
+    "name": "库存与租售",
+    "component": "./Games",
+    "scope": "store",
+    "group": {
+      "id": "game-center",
+      "name": "桌游管理"
+    }
+  },
+  {
+    "id": "game-library",
+    "path": "/game-library",
+    "name": "桌游资料库",
+    "component": "./GameLibrary",
+    "scope": "global",
+    "group": {
+      "id": "game-center",
+      "name": "桌游管理"
+    }
+  },
+  {
+    "id": "game-community",
+    "path": "/game-community",
+    "name": "玩家互动",
+    "component": "./GameCommunity",
+    "scope": "store",
+    "group": {
+      "id": "game-center",
+      "name": "桌游管理"
+    }
+  },
+  {
+    "id": "game-services",
+    "path": "/game-services",
+    "name": "租售规则",
+    "component": "./GameServices",
+    "scope": "store",
+    "group": {
+      "id": "game-center",
+      "name": "桌游管理"
+    }
+  },
+  {
+    "id": "play-pricing",
+    "path": "/play-pricing",
+    "name": "到店游玩计费",
+    "component": "./PlayPricing",
+    "scope": "store",
+    "group": {
+      "id": "game-center",
+      "name": "桌游管理"
+    }
+  },
+  {
     "id": "dishes",
     "path": "/dishes",
     "name": "门店菜单",
@@ -54,29 +124,40 @@
     "scope": "store",
     "group": {
       "id": "catering-center",
-      "name": "餐饮"
+      "name": "餐饮管理"
     }
   },
   {
     "id": "dish-library",
     "path": "/dish-library",
-    "name": "餐品信息库",
+    "name": "餐品资料库",
     "component": "./DishLibrary",
     "scope": "global",
     "group": {
       "id": "catering-center",
-      "name": "餐饮"
+      "name": "餐饮管理"
     }
   },
   {
-    "id": "events",
-    "path": "/events",
-    "name": "赛事大盘",
-    "component": "./Events",
+    "id": "users",
+    "path": "/users",
+    "name": "会员资料",
+    "component": "./Users",
     "scope": "store",
     "group": {
-      "id": "card-center",
-      "name": "卡牌"
+      "id": "member-center",
+      "name": "会员与积分"
+    }
+  },
+  {
+    "id": "month-card-open",
+    "path": "/month-card-open",
+    "name": "开通月卡",
+    "component": "./MonthCardOpen",
+    "scope": "admin",
+    "group": {
+      "id": "member-center",
+      "name": "会员与积分"
     }
   },
   {
@@ -86,8 +167,8 @@
     "component": "./WalletTiers",
     "scope": "global",
     "group": {
-      "id": "wallet-center",
-      "name": "储值"
+      "id": "member-center",
+      "name": "会员与积分"
     }
   },
   {
@@ -97,8 +178,8 @@
     "component": "./PointProducts",
     "scope": "global",
     "group": {
-      "id": "point-center",
-      "name": "积分"
+      "id": "member-center",
+      "name": "会员与积分"
     }
   },
   {
@@ -108,30 +189,8 @@
     "component": "./PointCategories",
     "scope": "global",
     "group": {
-      "id": "point-center",
-      "name": "积分"
-    }
-  },
-  {
-    "id": "point-withdraws",
-    "path": "/point-withdraws",
-    "name": "积分提取审计",
-    "component": "./PointWithdraws",
-    "scope": "store",
-    "group": {
-      "id": "point-center",
-      "name": "积分"
-    }
-  },
-  {
-    "id": "point-redeem-orders",
-    "path": "/point-redeem-orders",
-    "name": "积分兑换明细",
-    "component": "./PointRedeemOrders",
-    "scope": "store",
-    "group": {
-      "id": "point-center",
-      "name": "积分"
+      "id": "member-center",
+      "name": "会员与积分"
     }
   },
   {
@@ -141,63 +200,52 @@
     "component": "./PointConfig",
     "scope": "global",
     "group": {
-      "id": "point-center",
-      "name": "积分"
+      "id": "member-center",
+      "name": "会员与积分"
+    }
+  },
+  {
+    "id": "point-withdraws",
+    "path": "/point-withdraws",
+    "name": "积分提取记录",
+    "component": "./PointWithdraws",
+    "scope": "store",
+    "group": {
+      "id": "member-center",
+      "name": "会员与积分"
+    }
+  },
+  {
+    "id": "events",
+    "path": "/events",
+    "name": "赛事管理",
+    "component": "./Events",
+    "scope": "store",
+    "group": {
+      "id": "activity-center",
+      "name": "活动与展示"
     }
   },
   {
     "id": "home-banners",
     "path": "/home-banners",
-    "name": "展示管理",
+    "name": "小程序展示",
     "component": "./DisplayManagement",
     "scope": "global",
     "group": {
-      "id": "base-center",
-      "name": "基础管理"
+      "id": "activity-center",
+      "name": "活动与展示"
     }
   },
   {
-    "id": "games",
-    "path": "/games",
-    "name": "桌游库存",
-    "component": "./Games",
+    "id": "dashboard",
+    "path": "/dashboard",
+    "name": "经营概览",
+    "component": "./Dashboard",
     "scope": "store",
     "group": {
-      "id": "base-center",
-      "name": "基础管理"
-    }
-  },
-  {
-    "id": "game-library",
-    "path": "/game-library",
-    "name": "桌游信息库",
-    "component": "./GameLibrary",
-    "scope": "global",
-    "group": {
-      "id": "base-center",
-      "name": "基础管理"
-    }
-  },
-  {
-    "id": "users",
-    "path": "/users",
-    "name": "用户管理",
-    "component": "./Users",
-    "scope": "store",
-    "group": {
-      "id": "base-center",
-      "name": "基础管理"
-    }
-  },
-  {
-    "id": "staff-access",
-    "path": "/staff-access",
-    "name": "员工及门店授权管理",
-    "component": "./StaffAccess",
-    "scope": "admin",
-    "group": {
-      "id": "base-center",
-      "name": "基础管理"
+      "id": "finance-center",
+      "name": "经营与财务"
     }
   },
   {
@@ -208,7 +256,18 @@
     "scope": "store",
     "group": {
       "id": "finance-center",
-      "name": "财务结算"
+      "name": "经营与财务"
+    }
+  },
+  {
+    "id": "staff-access",
+    "path": "/staff-access",
+    "name": "员工与权限",
+    "component": "./StaffAccess",
+    "scope": "admin",
+    "group": {
+      "id": "system-center",
+      "name": "系统设置"
     }
   }
 ]

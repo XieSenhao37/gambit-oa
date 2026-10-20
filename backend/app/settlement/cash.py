@@ -6,7 +6,7 @@ from app.models import PayOrder, RefundRequest, Store
 from .models import SettlementControl, SettlementEntry, SettlementPeriod, SettlementReport
 from . import service
 
-CASH_KINDS = ('wechat_play', 'wechat_catering', 'wechat_refund')
+CASH_KINDS = ('wechat_play', 'wechat_catering', 'wechat_refund', 'game_service')
 
 
 def candidates(month, sid=None, strict=False):
@@ -99,7 +99,7 @@ def candidates(month, sid=None, strict=False):
 def breakdown(entries):
     """Signed store-level contributions. Components add up to the settlement net."""
     result = defaultdict(lambda: dict(wechat_play=0, wechat_catering=0, wechat_refund=0,
-        wallet=0, month_card=0, point_compensation=0, point_cost=0, adjustment=0, settlement_fee=0))
+        wallet=0, month_card=0, point_compensation=0, point_cost=0, adjustment=0, game_service=0, settlement_fee=0))
     for e in entries:
         kind = e['kind']
         for party, sign in ((e['receiver_id'], 1), (e['payer_id'], -1)):

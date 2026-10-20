@@ -135,6 +135,7 @@ def _paid_order_filters(start_dt, end_dt, store_id=None):
         PayOrder.created_at >= start_dt,
         PayOrder.created_at < end_dt,
         PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
     ]
     if store_id:
         filters.append(PayOrder.store_id == store_id)
@@ -148,6 +149,7 @@ def _paid_catering_filters(start_dt, end_dt, store_id=None):
         Catering.created_at >= start_dt,
         Catering.created_at < end_dt,
         PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         PayOrder.deleted_at.is_(None),
     ]
     if store_id:
@@ -342,6 +344,7 @@ def _play_query(start_dt, end_dt, store_id=None):
             PlayOrder.created_at < end_dt,
             PayOrder.deleted_at.is_(None),
             PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         )
     if store_id:
         query = query.filter(PlayOrder.store_id == store_id)
@@ -362,6 +365,7 @@ def _play_summary(start_dt, end_dt, store_id=None):
             PlayOrder.created_at < end_dt,
             PayOrder.deleted_at.is_(None),
             PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         )
     if store_id:
         row = row.filter(PlayOrder.store_id == store_id)
@@ -394,6 +398,7 @@ def _play_trend(start_dt, end_dt, granularity, store_id=None):
             PlayOrder.created_at < end_dt,
             PayOrder.deleted_at.is_(None),
             PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         )
     if store_id:
         query = query.filter(PlayOrder.store_id == store_id)
@@ -419,6 +424,7 @@ def _play_billing_mode(start_dt, end_dt, store_id=None):
             PlayOrder.created_at < end_dt,
             PayOrder.deleted_at.is_(None),
             PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         )
     if store_id:
         query = query.filter(PlayOrder.store_id == store_id)
@@ -444,6 +450,7 @@ def _play_payment(start_dt, end_dt, store_id=None):
             PlayOrder.created_at < end_dt,
             PayOrder.deleted_at.is_(None),
             PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         )
     if store_id:
         query = query.filter(PlayOrder.store_id == store_id)
@@ -469,6 +476,7 @@ def _refund_amount(start_dt, end_dt, store_id=None):
         PayOrder.updated_at >= start_dt,
         PayOrder.updated_at < end_dt,
         PayOrder.pay_status == 3,
+        PayOrder.board_game_order_id.is_(None),
     )
     if store_id:
         query = query.filter(PayOrder.store_id == store_id)
@@ -549,6 +557,7 @@ def _ops_trend(start_dt, end_dt, granularity, store_id=None):
         PlayOrder.created_at < end_dt,
         PayOrder.deleted_at.is_(None),
         PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
     )
     catering_rows = db.session.query(
         func.date_format(Catering.created_at, bucket_format).label('bucket'),
@@ -632,6 +641,7 @@ def _paid_user_counts(start_dt, end_dt, store_id=None):
     ).filter(
         PayOrder.deleted_at.is_(None),
         PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         or_(PayOrder.play_order_id.isnot(None), PayOrder.catering_id.isnot(None)),
     )
     if store_id:
@@ -659,6 +669,7 @@ def _coupon_effect_orders(start_dt, end_dt, store_id=None):
     ).select_from(PayOrder).join(CouponRecord, CouponRecord.id == PayOrder.coupon_id).filter(
         PayOrder.deleted_at.is_(None),
         PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
         PayOrder.created_at >= start_dt,
         PayOrder.created_at < end_dt,
         CouponRecord.deleted_at.is_(None),
@@ -1037,6 +1048,7 @@ def _user_insight_items(start_dt, end_dt, store_id=None, limit=50):
         PlayOrder.created_at < end_dt,
         PayOrder.deleted_at.is_(None),
         PayOrder.pay_status == 1,
+        PayOrder.board_game_order_id.is_(None),
     )
     catering_query = db.session.query(
         Catering.open_id,

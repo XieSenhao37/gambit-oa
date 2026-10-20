@@ -1,0 +1,37 @@
+const fs = require('fs');
+const ts = require('typescript');
+const vm = require('vm');
+const assert = require('node:assert/strict');
+const pages = require('../src/config/pages.json');
+function load(file, imports) {
+  const output = ts.transpileModule(fs.readFileSync(require.resolve(file), 'utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS, target:ts.ScriptTarget.ES2020, esModuleInterop:true}}).outputText;
+  const context = {exports:{}, URLSearchParams, require:id=>imports[id]};
+  vm.runInNewContext(output,context); return context.exports;
+}
+const {searchFunctions} = load('../src/config/navigation.ts',{'./pages.json':pages});
+const allowed = pages.map(page=>page.id);
+assert.equal(searchFunctions('改租金',allowed)[0].id,'games');
+assert.equal(searchFunctions('收货地址',allowed)[0].id,'game-services');
+assert.equal(searchFunctions('退押金',allowed)[0].id,'game-service-orders');
+assert.equal(searchFunctions('小时价格',allowed)[0].id,'play-pricing');
+assert.equal(searchFunctions('收货地址',['games']).length,0);
+assert.equal(searchFunctions('',[]).length,0);
+assert.equal(searchFunctions('基础管理',allowed).length,0);
+assert.equal(searchFunctions('/not-a-page',allowed).length,0);
+const {readOrderFilters,orderAction,orderActionLabel,deliveryLabel} = load('../src/pages/GameServiceOrders/presentation.ts',{'@/services/gameServices':{states:{pending_confirm:'待确认',awaiting_payment:'待付款',accepted:'待交付',rented:'出租中',completed:'已完成'}}});
+assert.equal(deliveryLabel('shipping'),'快递到付');
+assert.equal(deliveryLabel('shipping','sf_express'),'顺丰到付 · 特快');
+assert.equal(deliveryLabel('pickup','sf_local'),'门店自提');
+assert.equal(readOrderFilters('?status=overdue&page=3&kind=rental&keyword=卡坦').keyword,'卡坦');
+assert.equal(readOrderFilters('?status=overdue&page=3').page,3);
+assert.equal(readOrderFilters('?status=unknown&page=-4&kind=unsupported').status,'todo');
+assert.equal(readOrderFilters('?page=1.5').page,1);
+assert.equal(readOrderFilters('?status=').status,'');
+assert.equal(orderAction({Kind:'purchase',Status:'completed'}),'');
+assert.equal(orderAction({Kind:'purchase',Status:'rented'}),'');
+assert.equal(orderAction({Kind:'buyout',Status:'awaiting_payment'}),'');
+assert.equal(orderAction({Kind:'rental',Status:'awaiting_payment'}),'');
+assert.equal(orderAction({Kind:'rental',Status:'rented'}),'return_complete');
+assert.equal(orderActionLabel({Kind:'purchase',Status:'accepted',DeliveryMethod:'shipping'}),'登记发货');
+assert.equal(orderAction({Kind:'purchase',Status:'pending_confirm'}),'accept');
+console.log('Function discovery, permission visibility, deep links and next-action checks passed');

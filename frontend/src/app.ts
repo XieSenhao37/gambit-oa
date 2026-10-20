@@ -1,4 +1,9 @@
+import VersionUpdate from '@/components/VersionUpdate';
 import React from 'react';
+import './styles/operations.less';
+
+export const rootContainer = (container: React.ReactNode) =>
+  React.createElement(VersionUpdate, null, container);
 // 运行时配置
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
@@ -21,7 +26,17 @@ export async function getInitialState(): Promise<{
 
 import { getGroupedMenuData } from '@/config/menu';
 import { getAllowedPages, getCurrentStoreId } from '@/utils/pageStores';
-import { LogoutOutlined } from '@ant-design/icons';
+import {
+  AppstoreOutlined,
+  BarChartOutlined,
+  CalendarOutlined,
+  CoffeeOutlined,
+  HomeOutlined,
+  LogoutOutlined,
+  ProfileOutlined,
+  SettingOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
 import { history, RequestConfig, RuntimeConfig } from '@umijs/max';
 import { Button, message } from 'antd';
 
@@ -56,8 +71,26 @@ export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
     menu: {
       locale: false,
     },
-    menuDataRender: () =>
-      getGroupedMenuData(getAllowedPages(initialState?.auth?.Stores ?? [])),
+    menuDataRender: () => {
+      const icons: Record<string, React.ElementType> = {
+        '/workbench': HomeOutlined,
+        '/order-center': ProfileOutlined,
+        '/game-center': AppstoreOutlined,
+        '/catering-center': CoffeeOutlined,
+        '/member-center': TeamOutlined,
+        '/activity-center': CalendarOutlined,
+        '/finance-center': BarChartOutlined,
+        '/system-center': SettingOutlined,
+      };
+      return getGroupedMenuData(
+        getAllowedPages(initialState?.auth?.Stores ?? []),
+      ).map((node) => ({
+        ...node,
+        icon: icons[node.path]
+          ? React.createElement(icons[node.path])
+          : undefined,
+      }));
+    },
   };
 };
 
@@ -71,12 +104,20 @@ export const request: RequestConfig = {
         options.headers = {
           ...options.headers,
           Authorization: `Bearer ${token}`,
-          'X-Store-ID': String(getCurrentStoreId()),
+          'X-Store-ID': String(
+            (options.headers as Record<string, unknown> | undefined)?.[
+              'X-Store-ID'
+            ] ?? getCurrentStoreId(),
+          ),
         };
       } else {
         options.headers = {
           ...options.headers,
-          'X-Store-ID': String(getCurrentStoreId()),
+          'X-Store-ID': String(
+            (options.headers as Record<string, unknown> | undefined)?.[
+              'X-Store-ID'
+            ] ?? getCurrentStoreId(),
+          ),
         };
       }
       return { url, options };
@@ -107,7 +148,9 @@ export const request: RequestConfig = {
   ],
   errorConfig: {
     // 错误处理
-    errorHandler: (error: any) => {
+    errorHandler: (error: any, options) => {
+      if (options.skipErrorHandler && error.response?.status !== 401)
+        throw error;
       // 处理业务错误码
       if (error.response) {
         // 服务器返回了错误响应

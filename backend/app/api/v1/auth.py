@@ -87,7 +87,7 @@ def send_code():
     challenge_id = secrets.token_hex(24)
     code = f'{secrets.randbelow(1000000):06d}'
     LoginChallenge.query.filter_by(user_id=account.user_id, consumed=False).update({'consumed': True})
-    challenge = LoginChallenge(id=challenge_id, user_id=account.user_id, account_version=account.version, code_digest=digest(challenge_id + ':' + code), expires_at=datetime.utcnow() + timedelta(minutes=5))
+    challenge = LoginChallenge(id=challenge_id, user_id=account.user_id, account_version=account.version, code_digest=digest(challenge_id + ':' + code), expires_at=datetime.utcnow() + timedelta(minutes=sms.CODE_TTL_MINUTES))
     db.session.add(challenge)
     db.session.commit()
     try:

@@ -101,6 +101,13 @@ def get_user_list():
         consumption_subquery.c.total_consumption_amount,
         0,
     ).label('total_consumption_amount')
+    # Existing wallet tables use utf8mb4_unicode_ci, while newer users tables
+    # can use MySQL 8's utf8mb4_0900_ai_ci. An implicit column comparison raises
+    # error 1267. Collate the user side explicitly, leaving the wallet lookup
+    # column bare so its existing index can still serve the join.
+    wallet_user_open_id = User.open_id
+    if db.session.get_bind().dialect.name == 'mysql':
+        wallet_user_open_id = wallet_user_open_id.collate('utf8mb4_unicode_ci')
 
     # 构建查询条件
     query = db.session.query(
@@ -117,7 +124,7 @@ def get_user_list():
     ).outerjoin(
         WalletAccount,
         and_(
-            WalletAccount.open_id == User.open_id,
+            WalletAccount.open_id == wallet_user_open_id,
             WalletAccount.deleted_at.is_(None),
         ),
     ).outerjoin(

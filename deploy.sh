@@ -11,9 +11,20 @@ fi
 : "${PHONE_CRYPTO_KEY:?请配置原有手机号加密密钥 PHONE_CRYPTO_KEY}"
 if [ "${OA_LOGIN_MODE:-password}" = "password" ]; then
   : "${OA_ADMIN_PASSWORD:?请配置 OA_ADMIN_PASSWORD}"
+elif [ "$OA_LOGIN_MODE" = "sms" ]; then
+  : "${OA_AUTH_SECRET:?请配置 OA_AUTH_SECRET}"
+  [ "${#OA_AUTH_SECRET}" -ge 32 ] || { echo 'OA_AUTH_SECRET 至少需要32个字符' >&2; exit 1; }
+  : "${TENCENT_SMS_SECRET_ID:?请配置 TENCENT_SMS_SECRET_ID}"
+  : "${TENCENT_SMS_SECRET_KEY:?请配置 TENCENT_SMS_SECRET_KEY}"
+  : "${TENCENT_SMS_APP_ID:?请配置 TENCENT_SMS_APP_ID}"
+  : "${TENCENT_SMS_SIGN_NAME:?请配置 TENCENT_SMS_SIGN_NAME}"
+  : "${TENCENT_SMS_TEMPLATE_ID:?请配置 TENCENT_SMS_TEMPLATE_ID}"
+else
+  echo 'OA_LOGIN_MODE 仅支持 password 或 sms' >&2
+  exit 1
 fi
 
-IMAGE="ccr.ccs.tencentyun.com/gambit/gambit_oa:latest"
+IMAGE="${DEPLOY_IMAGE:-ccr.ccs.tencentyun.com/gambit/gambit_oa:latest}"
 DEPLOY_ENV="${1:-${DEPLOY_ENV:-test}}"
 CONTAINER_PORT="8080"
 : "${JWT_SECRET:?请配置 JWT_SECRET}"
@@ -85,6 +96,13 @@ docker run -d --name "$CONTAINER" \
   -e COS_SECRET_ID="${COS_SECRET_ID:-}" \
   -e COS_SECRET_KEY="${COS_SECRET_KEY:-}" \
   -e OA_LOGIN_MODE="${OA_LOGIN_MODE:-password}" \
+  -e OA_AUTH_SECRET="${OA_AUTH_SECRET:-}" \
+  -e TENCENT_SMS_SECRET_ID="${TENCENT_SMS_SECRET_ID:-}" \
+  -e TENCENT_SMS_SECRET_KEY="${TENCENT_SMS_SECRET_KEY:-}" \
+  -e TENCENT_SMS_APP_ID="${TENCENT_SMS_APP_ID:-}" \
+  -e TENCENT_SMS_SIGN_NAME="${TENCENT_SMS_SIGN_NAME:-}" \
+  -e TENCENT_SMS_TEMPLATE_ID="${TENCENT_SMS_TEMPLATE_ID:-}" \
+  -e TENCENT_SMS_REGION="${TENCENT_SMS_REGION:-ap-guangzhou}" \
   -e STORE_SETTLEMENT_ENABLED="$STORE_SETTLEMENT_ENABLED" \
   "$IMAGE"
 

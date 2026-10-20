@@ -1,3 +1,5 @@
+import FunctionSearch from '@/components/FunctionSearch';
+import GameOrderTodos from '@/components/GameOrderTodos';
 import StoreSwitcher from '@/components/StoreSwitcher';
 import pages from '@/config/pages.json';
 import { getMe } from '@/services/auth';
@@ -9,7 +11,7 @@ import {
   setCurrentStoreId,
 } from '@/utils/pageStores';
 import { Navigate, Outlet, useLocation, useModel } from '@umijs/max';
-import { Alert, Result } from 'antd';
+import { Result, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 export default function AuthWrapper() {
   const { initialState, setInitialState } = useModel('@@initialState');
@@ -63,29 +65,36 @@ export default function AuthWrapper() {
   if (readyContext !== contextKey) return null;
   return (
     <>
-      {page.scope === 'store' &&
-        !['dashboard', 'settlement'].includes(page.id) && (
-          <div
-            style={{
-              margin: '16px 24px 0',
-              padding: '12px 16px',
-              background: '#fff',
-              borderRadius: 8,
-            }}
-          >
-            <StoreSwitcher />
-          </div>
-        )}
-      {page.scope === 'global' && (
-        <Alert
-          showIcon
-          type="warning"
-          message="全品牌共享配置"
-          description="此页面的修改影响所有门店，请确认后操作。"
-          style={{ margin: 16 }}
-        />
-      )}
-      <Outlet key={contextKey} />
+      <div className="oa-context-bar">
+        <div className="oa-context-main">
+          <span className="oa-context-path">
+            {page.group?.name ? `${page.group.name} / ` : ''}
+            <strong>{page.name}</strong>
+          </span>
+          {page.scope === 'store' &&
+            !['dashboard', 'settlement', 'game-community'].includes(
+              page.id,
+            ) && <StoreSwitcher />}
+          {page.scope === 'global' && (
+            <Tooltip title="此页配置由所有门店共用，保存会影响全部门店。">
+              <span className="oa-scope-label">全门店共享</span>
+            </Tooltip>
+          )}
+          {page.scope === 'admin' && (
+            <span className="oa-scope-label">总部管理</span>
+          )}
+          {page.id === 'game-community' && (
+            <span className="oa-scope-label">全部授权门店</span>
+          )}
+        </div>
+        <div className="oa-context-tools">
+          <FunctionSearch />
+          <GameOrderTodos />
+        </div>
+      </div>
+      <div className="oa-content">
+        <Outlet key={contextKey} />
+      </div>
     </>
   );
 }

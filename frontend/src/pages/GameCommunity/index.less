@@ -1,0 +1,36 @@
+.community-page {
+  .ant-tabs-nav { margin-bottom: 16px; }
+  .community-panel { background: #fff; border: 1px solid #eeeff1; border-radius: 12px; padding: 0 24px 8px; }
+  .community-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 20px 0; }
+  .community-toolbar .ant-input-search { width: 320px; max-width: 100%; }
+  .community-toolbar .ant-select { width: 124px; }
+  .community-count { margin-left: auto; color: #747b85; font-size: 13px; }
+  .community-empty { padding: 36px 0; text-align: center; }
+  .community-loading { display: flex; flex-direction: column; gap: 32px; padding: 20px 0; }
+  .community-share { display: flex; gap: 14px; padding: 24px 0; border-top: 1px solid #f0f1f3; }
+  .community-share-avatar { flex-shrink: 0; }
+  .community-share-main { flex: 1; min-width: 0; }
+  .community-share-heading { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 24px; font-size: 14px; }
+  .community-share-heading .ant-tag { margin: 0; background: #f5f6f8; border: 0; color: #616a77; }
+  .community-share-meta { display: flex; gap: 6px 16px; flex-wrap: wrap; margin-top: 4px; color: #747b85; font-size: 13px; }
+  .community-share-game { color: #424955; font-weight: 500; overflow-wrap: anywhere; }
+  .community-share-content { margin: 14px 0 0; max-width: 880px; font-size: 14px; line-height: 1.75; color: #242830; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .community-share-images { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .community-share-images .ant-image { overflow: hidden; border-radius: 8px; background: #f5f6f8; }
+  .community-share-actions { display: flex; flex-shrink: 0; align-items: flex-start; gap: 8px; }
+  .community-share-actions .ant-btn { font-size: 13px; }
+  .community-pagination { display: flex; justify-content: flex-end; padding: 20px 0 12px; border-top: 1px solid #f0f1f3; }
+  @media (max-width: 900px) {
+    .community-panel { padding: 0 16px 8px; }
+    .community-share { flex-wrap: wrap; }
+    .community-share-actions { margin-left: 54px; width: calc(100% - 54px); }
+  }
+  @media (max-width: 575px) {
+    .community-toolbar .ant-input-search { width: 100%; }
+    .community-count { font-size: 12px; }
+    .community-share-meta time { width: 100%; }
+  }
+}
+.community-settings { display: flex; flex-direction: column; gap: 10px; padding: 12px 0; }
+.community-settings label { margin-top: 8px; font-weight: 500; }
+.community-settings .ant-input-number { width: 100%; }

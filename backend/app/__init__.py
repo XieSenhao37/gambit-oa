@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from flask import Flask, abort, send_from_directory
+from flask import Flask, abort, request, send_from_directory
+import re
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from .config import Config
@@ -37,11 +38,38 @@ def _register_frontend_routes(app):
         if path == "health":
             abort(404)
 
+        if path == "version.json":
+            # Update checks must never reuse a cached release manifest or SPA HTML.
+            response = send_from_directory(dist_dir, path, conditional=False)
+            response.headers['Cache-Control'] = 'no-store, no-cache, max-age=0'
+            return response
+
         requested_file = dist_dir / path
         if path and requested_file.is_file():
-            return send_from_directory(dist_dir, path)
+            # Only content-hashed assets get immutable caching. HTML and legacy
+            # filenames must revalidate so deployments remain visible on refresh.
+            versioned = bool(re.search(r'\.[0-9a-f]{8,}(?:\.(?:async|chunk))?\.(?:js|css)$', path))
+            compressed = requested_file.suffix in ('.js', '.css') and Path(str(requested_file) + '.gz').is_file()
+            use_gzip = compressed and request.accept_encodings['gzip'] > 0
+            response = send_from_directory(
+                dist_dir, path + '.gz' if use_gzip else path,
+                mimetype='text/javascript' if requested_file.suffix == '.js' else ('text/css' if requested_file.suffix == '.css' else None),
+                max_age=31536000 if versioned else None,
+            )
+            if versioned:
+                response.cache_control.immutable = True
+            if compressed:
+                response.vary.add('Accept-Encoding')
+            if use_gzip and response.status_code != 304:
+                response.headers['Content-Encoding'] = 'gzip'
+            return response
 
-        return send_from_directory(dist_dir, "index.html")
+        # A missing lazy-loaded asset is a 404, not HTML disguised as JavaScript.
+        if path.endswith(('.js', '.css', '.gz', '.map')) or path.startswith('static/'):
+            abort(404)
+        response = send_from_directory(dist_dir, "index.html")
+        response.cache_control.no_cache = True
+        return response
 
 
 def create_app(config_override=None):

@@ -44,6 +44,18 @@ class StaffSecurityTest(unittest.TestCase):
         self.assertIn('dashboard', r['Stores'][1]['Pages'])
         self.assertEqual(len(self.client.get('/admin_api/store/v1/list', headers=self.headers()).json['Data']['Items']), 2)
 
+    def test_manual_card_page_is_under_membership_and_headquarters_only(self):
+        from app.security.policy import PAGE_MAP
+        page = PAGE_MAP['month-card-open']
+        self.assertEqual(page['group']['id'],'member-center')
+        self.assertEqual(page['scope'],'admin')
+        for uid in (1,2):
+            data=self.client.get('/admin_api/auth/v1/me',headers=self.headers(user=uid)).json['Data']
+            for store in data['Stores']:
+                self.assertEqual('month-card-open' in store['Pages'],uid==2)
+        self.assertEqual(self.client.put('/admin_api/staff-access/v1/pages/manager',
+            json={'Pages':{'month-card-open':True}},headers=self.headers(user=2)).status_code,400)
+
     def test_revocation_and_logout(self):
         db.session.get(StaffAccount, 1).enabled = False
         db.session.commit()
@@ -79,6 +91,32 @@ class StaffSecurityTest(unittest.TestCase):
         self.app.config['TENCENT_SMS_TEMPLATE_ID'] = ''
         self.assertFalse(self.client.get('/admin_api/auth/v1/status').json['Data']['SmsReady'])
         self.assertEqual(self.client.post('/admin_api/auth/v1/send-code', json={'PhoneNumber': '13800138002'}).status_code, 503)
+
+    @patch('tencentcloud.sms.v20210111.sms_client.SmsClient.SendSms')
+    def test_headquarters_login_with_actual_sms_adapter(self, provider):
+        from types import SimpleNamespace
+        provider.return_value = SimpleNamespace(SendStatusSet=[SimpleNamespace(Code='Ok')])
+        before = datetime.utcnow()
+        result = self.client.post('/admin_api/auth/v1/send-code', json={'PhoneNumber': '13800138002'})
+        self.assertEqual(result.status_code, 200, result.json)
+        request = provider.call_args.args[0]
+        self.assertEqual(request.PhoneNumberSet, ['+8613800138002'])
+        self.assertEqual(request.TemplateParamSet[1], '5')
+        cid = result.json['Data']['ChallengeId']
+        challenge = db.session.get(LoginChallenge, cid)
+        self.assertGreaterEqual(challenge.expires_at, before + timedelta(minutes=5))
+        self.assertLess(challenge.expires_at, before + timedelta(minutes=5, seconds=5))
+        self.assertEqual(len(challenge.code_digest), 64)
+        result = self.client.post('/admin_api/auth/v1/login', json={
+            'ChallengeId': cid, 'Code': request.TemplateParamSet[0]})
+        self.assertEqual(result.status_code, 200, result.json)
+        identity = self.client.get('/admin_api/auth/v1/me', headers={
+            'Authorization': 'Bearer ' + result.json['Data']['token']}).json['Data']
+        self.assertTrue(identity['Headquarters'])
+        self.assertEqual(identity['UserId'], 2)
+        self.assertEqual({store['Id'] for store in identity['Stores']}, {1, 2, 3})
+        for store in identity['Stores']:
+            self.assertEqual(set(store['Pages']), {page['id'] for page in identity['Pages']})
 
     def test_unknown_token_and_old_password_denied(self):
         self.assertEqual(self.client.get('/admin_api/auth/v1/me', headers={'Authorization': 'Bearer old-jwt'}).status_code, 401)

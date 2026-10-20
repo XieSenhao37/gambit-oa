@@ -7,7 +7,7 @@ from .models import StaffAccount, StaffGrant, RolePage, AccessAudit
 PAGES = json.loads(Path(__file__).with_name('pages.json').read_text())
 PAGE_MAP = {p['id']: p for p in PAGES}
 ROLES = ('worker', 'manager')
-WORKER_PAGES = {'workbench', 'orders', 'catering-orders'}
+WORKER_PAGES = {'workbench', 'orders', 'catering-orders', 'game-service-orders', 'game-community'}
 
 def principal(user_id):
     account = db.session.get(StaffAccount, user_id)

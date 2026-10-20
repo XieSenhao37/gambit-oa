@@ -65,6 +65,7 @@ const states: Record<string, string> = {
   returned: '已退回',
 };
 const kinds: Record<string, string> = {
+  game_service: '桌游租售与赔偿净收入',
   wechat_play: '游玩微信收款',
   wechat_catering: '餐饮微信收款',
   wechat_refund: '微信消费退款',
@@ -769,6 +770,7 @@ export default function Settlement() {
                 [
                   { title: '门店', dataIndex: 'StoreName' },
                   ...[
+                    ['game_service', '桌游租售与赔偿净收入'],
                     ['wechat_play', '游玩微信收款'],
                     ['wechat_catering', '餐饮微信收款'],
                     ['wechat_refund', '微信退款'],

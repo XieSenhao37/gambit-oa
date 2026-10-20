@@ -1,5 +1,6 @@
 import json
 
+from app.services.game_stock_guard import require_unallocated_inventory
 from flask import Blueprint, jsonify, request
 from app.models import BoardGame, BoardGameStoreInventory
 from app import db
@@ -413,7 +414,7 @@ def add_inventory_game():
     game = BoardGame.query.filter(
         BoardGame.id == board_game_id,
         BoardGame.deleted_at.is_(None),
-    ).first()
+    ).with_for_update().first()
     if not game:
         return jsonify({'Code': 404, 'Message': '桌游不存在', 'Data': None}), 404
 
@@ -421,7 +422,12 @@ def add_inventory_game():
     inventory = BoardGameStoreInventory.query.filter(
         BoardGameStoreInventory.store_id == store_id,
         BoardGameStoreInventory.board_game_id == board_game_id,
-    ).first()
+    ).with_for_update().first()
+    try:
+        require_unallocated_inventory(store_id, board_game_id, count)
+    except ValueError as exc:
+        db.session.rollback()
+        return jsonify(Code=400, Message=str(exc)), 400
     if inventory:
         inventory.count = count
         inventory.deleted_at = None
@@ -458,9 +464,14 @@ def update_inventory_game(game_id):
         BoardGameStoreInventory.store_id == store_id,
         BoardGameStoreInventory.board_game_id == game_id,
         BoardGameStoreInventory.deleted_at.is_(None),
-    ).first()
+    ).with_for_update().first()
     if not inventory:
         return jsonify({'Code': 404, 'Message': '当前门店库存不存在', 'Data': None}), 404
+    try:
+        require_unallocated_inventory(store_id, game_id, count)
+    except ValueError as exc:
+        db.session.rollback()
+        return jsonify(Code=400, Message=str(exc)), 400
     inventory.count = count
     inventory.updated_at = datetime.utcnow()
     db.session.commit()
@@ -480,9 +491,14 @@ def delete_inventory_game(game_id):
         BoardGameStoreInventory.store_id == store_id,
         BoardGameStoreInventory.board_game_id == game_id,
         BoardGameStoreInventory.deleted_at.is_(None),
-    ).first()
+    ).with_for_update().first()
     if not inventory:
         return jsonify({'Code': 404, 'Message': '当前门店库存不存在', 'Data': None}), 404
+    try:
+        require_unallocated_inventory(store_id, game_id, 0)
+    except ValueError as exc:
+        db.session.rollback()
+        return jsonify(Code=400, Message=str(exc)), 400
     inventory.deleted_at = datetime.utcnow()
     inventory.updated_at = datetime.utcnow()
     db.session.commit()

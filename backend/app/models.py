@@ -226,6 +226,7 @@ class PayOrder(db.Model):
     description = db.Column(db.Text, comment='支付描述信息')
     expire_time = db.Column(db.DateTime, comment='订单过期时间')
     pay_end_time = db.Column(db.DateTime, comment='支付完成时间')
+    board_game_order_id = db.Column(db.Integer, comment='桌游租售订单id')
     catering_id = db.Column(db.Integer, comment='餐饮订单id')
     coupon_id = db.Column(db.Integer, comment='优惠券记录 id')
     order_id = db.Column(db.String(255), comment='商户订单号')
