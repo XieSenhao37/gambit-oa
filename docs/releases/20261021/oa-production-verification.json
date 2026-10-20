@@ -59,5 +59,49 @@
   ],
   "browser_login_page": "verified",
   "login_screenshot": "/tmp/gambit-oa-production-20261021/login.png",
-  "go_integration_status": "pending: official capabilities returned HTTP404 after user-reported Go deployment"
+  "go_integration_status": "passed: production OA to production Go read-only integration",
+  "go_integration_verified_at": "2026-10-21T02:08:17.307814+08:00",
+  "go_capabilities": {
+    "Check": "GoCapabilities",
+    "HTTP": 200,
+    "Version": "2026-10-19.9",
+    "Ready": true
+  },
+  "oa_to_go_read_only_checks": {
+    "Check": "ProductionOAToGo",
+    "Results": [
+      {
+        "interface": "policy",
+        "HTTP": 200,
+        "Code": 0
+      },
+      {
+        "interface": "stocks",
+        "HTTP": 200,
+        "Code": 0
+      },
+      {
+        "interface": "inventory",
+        "HTTP": 200,
+        "Code": 0
+      },
+      {
+        "interface": "orders",
+        "HTTP": 200,
+        "Code": 0
+      },
+      {
+        "interface": "community",
+        "HTTP": 200,
+        "Code": 0
+      },
+      {
+        "interface": "todos",
+        "HTTP": 200,
+        "Code": 0
+      }
+    ],
+    "BusinessWrites": false,
+    "NewLoginSessions": false
+  }
 }
