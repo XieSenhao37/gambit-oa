@@ -48,6 +48,31 @@ class SmsAdapterTest(unittest.TestCase):
             sms.send_code('13800138001', '012345')
         send.assert_not_called()
 
+    @patch('tencentcloud.sms.v20210111.sms_client.SmsClient.SendSms')
+    def test_provider_exception_keeps_only_safe_code_and_request_id(self, send):
+        from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+        send.side_effect = TencentCloudSDKException('AuthFailure.SecretIdNotFound', 'private phone 13800138001 and OTP 012345', 'safe-request-id')
+        with self.assertRaises(sms.SmsSendError) as caught:
+            sms.send_code('13800138001', '012345')
+        self.assertEqual(caught.exception.code, 'AuthFailure.SecretIdNotFound')
+        self.assertEqual(caught.exception.request_id, 'safe-request-id')
+        self.assertNotIn('13800138001', str(caught.exception))
+        self.assertNotIn('012345', str(caught.exception))
+
+    @patch('tencentcloud.sms.v20210111.sms_client.SmsClient.SendSms')
+    def test_response_error_and_request_id_are_available_without_provider_message(self, send):
+        send.return_value = SimpleNamespace(SendStatusSet=[SimpleNamespace(Code='LimitExceeded.PhoneNumberOneHourLimit', Message='private phone 13800138001')], RequestId='safe-request-id')
+        with self.assertRaises(sms.SmsSendError) as caught:
+            sms.send_code('13800138001', '012345')
+        self.assertEqual(caught.exception.request_id, 'safe-request-id')
+        self.assertIn('过于频繁', caught.exception.user_message)
+        self.assertNotIn('13800138001', str(caught.exception))
+
+    def test_untrusted_diagnostics_cannot_inject_logs(self):
+        error = sms.SmsSendError('bad\nphone=13800138001', 'bad\ncode=012345')
+        self.assertEqual(error.code, 'UnknownProviderError')
+        self.assertEqual(error.request_id, '-')
+
 
 if __name__ == '__main__':
     unittest.main()

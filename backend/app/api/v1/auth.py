@@ -92,8 +92,13 @@ def send_code():
     db.session.commit()
     try:
         sms.send_code(phone, code)
-    except Exception:
-        abort(503, description='短信发送失败或服务未就绪，请稍后重试')
+    except sms.SmsSendError as error:
+        current_app.logger.warning('oa_sms_send_failed provider_code=%s request_id=%s', error.code, error.request_id)
+        abort(503, description=error.user_message)
+    except Exception as error:
+        # Exception text and tracebacks can include the phone, OTP or SDK credentials.
+        current_app.logger.warning('oa_sms_send_failed exception_type=%s', type(error).__name__)
+        abort(503, description='短信发送失败，请稍后重试或联系管理员')
     challenge.sent = True
     db.session.commit()
     return ok({'ChallengeId': challenge_id, 'RetryAfter': 60})
