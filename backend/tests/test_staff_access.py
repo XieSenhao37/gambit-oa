@@ -92,6 +92,33 @@ class StaffSecurityTest(unittest.TestCase):
         self.assertFalse(self.client.get('/admin_api/auth/v1/status').json['Data']['SmsReady'])
         self.assertEqual(self.client.post('/admin_api/auth/v1/send-code', json={'PhoneNumber': '13800138002'}).status_code, 503)
 
+    @patch('app.security.sms.send_code')
+    def test_sms_failure_logs_safe_provider_metadata_and_does_not_mark_sent(self, send):
+        from app.security.sms import SmsSendError
+        send.side_effect = SmsSendError('FailedOperation.InsufficientBalance', 'safe-request-id')
+        with self.assertLogs(self.app.logger, level='WARNING') as captured:
+            response = self.client.post('/admin_api/auth/v1/send-code', json={'PhoneNumber': '13800138001'})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json['Message'], '短信额度不足，请联系管理员')
+        logs = '\n'.join(captured.output)
+        self.assertIn('FailedOperation.InsufficientBalance', logs)
+        self.assertIn('safe-request-id', logs)
+        self.assertNotIn('13800138001', logs)
+        self.assertFalse(LoginChallenge.query.one().sent)
+        self.assertNotIn('ChallengeId', str(response.json))
+
+    @patch('app.security.sms.send_code')
+    def test_unexpected_sms_exception_text_is_never_logged(self, send):
+        send.side_effect = RuntimeError('private phone 13800138001 OTP 012345')
+        with self.assertLogs(self.app.logger, level='WARNING') as captured:
+            response = self.client.post('/admin_api/auth/v1/send-code', json={'PhoneNumber': '13800138001'})
+        self.assertEqual(response.status_code, 503)
+        logs = '\n'.join(captured.output)
+        self.assertIn('exception_type=RuntimeError', logs)
+        self.assertNotIn('13800138001', logs)
+        self.assertNotIn('012345', logs)
+        self.assertNotIn('private phone', logs)
+
     @patch('tencentcloud.sms.v20210111.sms_client.SmsClient.SendSms')
     def test_headquarters_login_with_actual_sms_adapter(self, provider):
         from types import SimpleNamespace
