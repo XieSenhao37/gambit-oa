@@ -73,6 +73,14 @@ class SmsAdapterTest(unittest.TestCase):
         self.assertEqual(error.code, 'UnknownProviderError')
         self.assertEqual(error.request_id, '-')
 
+    def test_daily_limit_does_not_suggest_short_retry(self):
+        daily = sms.SmsSendError('LimitExceeded.PhoneNumberDailyLimit')
+        self.assertIn('今日', daily.user_message)
+        self.assertIn('明日', daily.user_message)
+        self.assertNotIn('稍后', daily.user_message)
+        hourly = sms.SmsSendError('LimitExceeded.PhoneNumberOneHourLimit')
+        self.assertNotEqual(daily.user_message, hourly.user_message)
+
 
 if __name__ == '__main__':
     unittest.main()
