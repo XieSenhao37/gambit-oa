@@ -12,7 +12,9 @@ class SmsSendError(RuntimeError):
     def __init__(self, code, request_id=None):
         self.code = code if isinstance(code, str) and re.fullmatch(r'[A-Za-z][A-Za-z0-9_.]{0,99}', code) else 'UnknownProviderError'
         self.request_id = request_id if isinstance(request_id, str) and re.fullmatch(r'[A-Za-z0-9-]{1,80}', request_id) else '-'
-        if self.code.startswith('LimitExceeded.'):
+        if self.code == 'LimitExceeded.PhoneNumberDailyLimit':
+            self.user_message = '该手机号今日验证码发送次数已达上限，请明日再试或联系管理员'
+        elif self.code.startswith('LimitExceeded.'):
             self.user_message = '验证码发送过于频繁，请稍后重试'
         elif self.code.startswith('FailedOperation.InsufficientBalance'):
             self.user_message = '短信额度不足，请联系管理员'

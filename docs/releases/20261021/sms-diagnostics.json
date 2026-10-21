@@ -18,7 +18,7 @@
   "source_commit": "535fe68",
   "image_digest": "sha256:63188b6bc67af3837b44643790720977c0a7d8147b22a62ceca6b7aaff744f22",
   "image_isolated_tests_passed": 49,
-  "status": "diagnostic_release_deployed_waiting_for_user_retry",
+  "status": "provider_phone_daily_limit_confirmed",
   "deployment": {
     "event": "result",
     "status": "completed",
@@ -38,5 +38,10 @@
     "login_mode": "sms",
     "sms_ready": true,
     "anonymous_guards": "passed"
-  }
+  },
+  "provider_error_code": "LimitExceeded.PhoneNumberDailyLimit",
+  "provider_request_id": "1b6618b8-3ef7-4ab2-9694-633dea4f3631",
+  "provider_error_logged_at_utc": "2026-10-21T09:07:15.266Z",
+  "provider_limit_changed": false,
+  "delivery_verified": false
 }
