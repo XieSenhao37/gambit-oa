@@ -25,6 +25,11 @@ import {
 import dayjs from 'dayjs';
 import { useEffect, useRef, useState } from 'react';
 const { Text } = Typography;
+const displayText = (value?: string) => value?.trim() || '/';
+const displayPlayerNickname = (value: string, row: { user_id?: number }) =>
+  !row.user_id || !value || ['未匹配', '未填写昵称'].includes(value)
+    ? '/'
+    : value;
 export default function Events() {
   const [projects, setProjects] = useState<any[]>([]),
     [project, setProject] = useState<number>(),
@@ -151,9 +156,9 @@ export default function Events() {
     cfgForm.setFieldsValue(row || { name: '', status: 1, sort: 0 });
   };
   const identity = [
-    { title: '赛事 ID', dataIndex: 'card_id', render: (v: string) => v || '历史记录未填写' },
-    { title: '昵称', dataIndex: 'nick_name' },
-    { title: 'Gambit 玩家 ID', dataIndex: 'user_id', render: (v: number) => v || '未匹配' },
+    { title: '赛事 ID', dataIndex: 'card_id', render: displayText },
+    { title: '昵称', dataIndex: 'nick_name', render: displayPlayerNickname },
+    { title: 'Gambit 玩家 ID', dataIndex: 'user_id', render: (v: number) => v || '/' },
   ];
   const eventColumns = [
     {
@@ -320,7 +325,7 @@ export default function Events() {
                         title: '联系电话',
                         dataIndex: 'phone',
                         render: (v: string) => (
-                          <Text copyable={!!v}>{v || '未提供'}</Text>
+                          <Text copyable={!!v}>{v || '/'}</Text>
                         ),
                       },
                       { title: '上月场次', dataIndex: 'previous_events' },
@@ -392,7 +397,7 @@ export default function Events() {
                   dataSource={claims}
                   columns={[
                     { title: '玩家编号', dataIndex: 'user_id' },
-                    { title: '昵称', dataIndex: 'nick_name' },
+                    { title: '昵称', dataIndex: 'nick_name', render: displayPlayerNickname },
                     { title: '积分', dataIndex: 'points' },
                     { title: '核销人', dataIndex: 'verifier' },
                     { title: '核销门店', dataIndex: 'store_name' },
@@ -464,8 +469,8 @@ export default function Events() {
           columns={[
             ...identity,
             ...(detail?.Event.source === 'report'
-              ? [{ title: '截图昵称', dataIndex: 'screenshot_name' }]
-              : [{ title: '电话', dataIndex: 'phone' }]),
+              ? [{ title: '截图昵称', dataIndex: 'screenshot_name', render: displayText }]
+              : [{ title: '电话', dataIndex: 'phone', render: displayText }]),
             { title: '记录时间', dataIndex: 'created_at' },
             { title: '积分', dataIndex: 'points' },
             { title: '名次', dataIndex: 'rank' },
