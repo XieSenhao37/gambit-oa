@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Deploy a reviewed OA image by digest; Go deployment is outside this command.
 
-Default is read-only preflight. --apply --sms-login performs the explicitly
-approved production OA replacement and SMS login switch, preserving all other
-runtime configuration. Credentials never leave the server.
+Default is read-only preflight. --apply replaces the production OA image and
+preserves every runtime environment value. --sms-login additionally performs the
+previously supported explicit SMS login switch. Credentials never leave the server.
 """
 import argparse
 import json
@@ -104,14 +104,14 @@ def remote(payload):
             raise RuntimeError('Production port mapping mismatch')
         required=('JWT_SECRET','SECRET_KEY','PHONE_CRYPTO_KEY','GAMBIT_INTERNAL_TOKEN','STORE_SETTLEMENT_ENABLED')
         if not all(env.get(key) for key in required):raise RuntimeError('Missing production configuration')
-        public_sms=('TENCENT_SMS_APP_ID','TENCENT_SMS_SIGN_NAME','TENCENT_SMS_TEMPLATE_ID')
-        if not all(test_env.get(key) for key in public_sms):raise RuntimeError('Reviewed SMS configuration unavailable')
-        if test_env.get('TENCENT_SMS_SECRET_ID')!=env.get('COS_SECRET_ID') or test_env.get('TENCENT_SMS_SECRET_KEY')!=env.get('COS_SECRET_KEY'):
-            raise RuntimeError('Reviewed SMS credentials do not match production cloud credentials')
+        if payload['sms_login']:
+            public_sms=('TENCENT_SMS_APP_ID','TENCENT_SMS_SIGN_NAME','TENCENT_SMS_TEMPLATE_ID')
+            if not all(test_env.get(key) for key in public_sms):raise RuntimeError('Reviewed SMS configuration unavailable')
+            if test_env.get('TENCENT_SMS_SECRET_ID')!=env.get('COS_SECRET_ID') or test_env.get('TENCENT_SMS_SECRET_KEY')!=env.get('COS_SECRET_KEY'):
+                raise RuntimeError('Reviewed SMS credentials do not match production cloud credentials')
         emit('preflight',container_id=prod['Id'],old_image=prod['Image'],settlement_enabled=env['STORE_SETTLEMENT_ENABLED'],test_container_id=test['Id'])
         if not payload['apply']:
             emit('result',status='checked_not_applied');return
-        if not payload['sms_login']:raise RuntimeError('Explicit SMS switch option required for this rollout')
         image=IMAGE+'@'+payload['digest']
         docker('pull',image)
         expected_image=json.loads(docker('image','inspect',image))[0]
@@ -126,14 +126,16 @@ def remote(payload):
         with os.fdopen(os.open(backup/'previous-container.json',os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600),'w',encoding='utf-8') as stream:
             json.dump(prod,stream)
         updated=dict(env)
-        updated['OA_LOGIN_MODE']='sms'
-        if len(updated.get('OA_AUTH_SECRET',''))<32:updated['OA_AUTH_SECRET']=secrets.token_hex(32)
-        updated['TENCENT_SMS_SECRET_ID']=env['COS_SECRET_ID']
-        updated['TENCENT_SMS_SECRET_KEY']=env['COS_SECRET_KEY']
-        for key in public_sms:updated[key]=test_env[key]
-        updated['TENCENT_SMS_REGION']=test_env.get('TENCENT_SMS_REGION','ap-guangzhou')
+        if payload['sms_login']:
+            updated['OA_LOGIN_MODE']='sms'
+            if len(updated.get('OA_AUTH_SECRET',''))<32:updated['OA_AUTH_SECRET']=secrets.token_hex(32)
+            updated['TENCENT_SMS_SECRET_ID']=env['COS_SECRET_ID']
+            updated['TENCENT_SMS_SECRET_KEY']=env['COS_SECRET_KEY']
+            for key in public_sms:updated[key]=test_env[key]
+            updated['TENCENT_SMS_REGION']=test_env.get('TENCENT_SMS_REGION','ap-guangzhou')
         changed=sorted(key for key in updated if updated[key]!=env.get(key))
         allowed={'OA_LOGIN_MODE','OA_AUTH_SECRET','TENCENT_SMS_SECRET_ID','TENCENT_SMS_SECRET_KEY','TENCENT_SMS_APP_ID','TENCENT_SMS_SIGN_NAME','TENCENT_SMS_TEMPLATE_ID','TENCENT_SMS_REGION'}
+        if not payload['sms_login'] and changed:raise RuntimeError('Runtime configuration must remain unchanged')
         if set(changed)-allowed:raise RuntimeError('Unapproved runtime configuration change')
         if any('\n' in value or '\r' in value for value in updated.values()):raise RuntimeError('Unsupported multiline runtime value')
         envfile=backup/'runtime.env'

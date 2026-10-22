@@ -137,9 +137,11 @@ export default function Events() {
       generation.current++;
     };
   }, [project, store, month]);
-  const openEvent = async (id: number) => {
+  const openEvent = async (id: number, source = 'checkin') => {
     try {
-      setDetail(await eventAPI('events/' + id));
+      setDetail(
+        await eventAPI((source === 'report' ? 'reports/' : 'events/') + id),
+      );
     } catch (e: any) {
       message.error(e.message);
     }
@@ -155,10 +157,10 @@ export default function Events() {
   ];
   const eventColumns = [
     {
-      title: '赛事 ID',
+      title: '赛事编号 / 活动名称',
       dataIndex: 'code',
       render: (v: string, r: any) => (
-        <Button type="link" onClick={() => openEvent(r.id)}>
+        <Button type="link" onClick={() => openEvent(r.id, r.source)}>
           {v}
         </Button>
       ),
@@ -174,11 +176,26 @@ export default function Events() {
       dataIndex: 'participants',
       sorter: (a: any, b: any) => a.participants - b.participants,
     },
-    { title: '签到积分', dataIndex: 'points' },
+    {
+      title: '来源',
+      dataIndex: 'source',
+      render: (v: string) => (v === 'report' ? '赛事回传' : '赛事签到'),
+    },
+    {
+      title: '积分',
+      render: (_: any, r: any) =>
+        r.source === 'report'
+          ? `共 ${r.total_points} 积分`
+          : `每人 ${r.points} 积分`,
+    },
     {
       title: '状态',
       dataIndex: 'status',
-      render: (v: string) => <Tag>{v === 'ended' ? '已结束' : '可签到'}</Tag>,
+      render: (v: string) => (
+        <Tag>
+          {v === 'issued' ? '已发放' : v === 'ended' ? '已结束' : '可签到'}
+        </Tag>
+      ),
     },
   ];
   const configColumns = [
@@ -257,7 +274,7 @@ export default function Events() {
                   <Text type="secondary">
                     MAU 按参赛人次累加；连续 UU
                     为相邻两个月均参赛的玩家；回归率＝连续
-                    UU／上月去重玩家数。场次按首位成功签到时间归属月份，空赛事不计入。
+                    UU／上月去重玩家数。签到按首位成功签到时间、回传按积分发放时间归属月份；未发放回传和空赛事不计入。
                   </Text>
                 </Card>
                 <Card
@@ -266,7 +283,7 @@ export default function Events() {
                 >
                   <Table
                     loading={busy}
-                    rowKey="id"
+                    rowKey={(r: any) => `${r.source}:${r.id}`}
                     dataSource={data?.EventRanking || []}
                     columns={eventColumns.slice(0, 4)}
                     scroll={{ x: 700 }}
@@ -356,7 +373,7 @@ export default function Events() {
             children: (
               <Card>
                 <Table
-                  rowKey="id"
+                  rowKey={(r: any) => `${r.source}:${r.id}`}
                   loading={busy}
                   dataSource={events}
                   columns={eventColumns}
@@ -437,32 +454,44 @@ export default function Events() {
         }
       >
         <Text type="secondary">
-          签到 ID 为当次参赛快照；修改名次与卡组不会自动发放积分。允许并列名次。
+          {detail?.Event.source === 'report'
+            ? '赛事回传为发放时的确认结果，仅供查看；不重复发放积分。'
+            : '签到 ID 为当次参赛快照；修改名次与卡组不会自动发放积分。允许并列名次。'}
         </Text>
         <Table
           rowKey="id"
           dataSource={detail?.Items || []}
           columns={[
             ...identity,
-            { title: '电话', dataIndex: 'phone' },
-            { title: '签到时间', dataIndex: 'created_at' },
+            ...(detail?.Event.source === 'report'
+              ? [{ title: '截图昵称', dataIndex: 'screenshot_name' }]
+              : [{ title: '电话', dataIndex: 'phone' }]),
+            { title: '记录时间', dataIndex: 'created_at' },
+            { title: '积分', dataIndex: 'points' },
             { title: '名次', dataIndex: 'rank' },
-            { title: '卡组', dataIndex: 'deck_name' },
-            {
-              title: '操作',
-              render: (_: any, r: any) => (
-                <Button
-                  type="link"
-                  onClick={() => {
-                    setEdit(r);
-                    setNewDeckName('');
-                    form.setFieldsValue({ rank: r.rank, deck_id: r.deck_id });
-                  }}
-                >
-                  编辑
-                </Button>
-              ),
-            },
+            ...(detail?.Event.source === 'report'
+              ? []
+              : [
+                  { title: '卡组', dataIndex: 'deck_name' },
+                  {
+                    title: '操作',
+                    render: (_: any, r: any) => (
+                      <Button
+                        type="link"
+                        onClick={() => {
+                          setEdit(r);
+                          setNewDeckName('');
+                          form.setFieldsValue({
+                            rank: r.rank,
+                            deck_id: r.deck_id,
+                          });
+                        }}
+                      >
+                        编辑
+                      </Button>
+                    ),
+                  },
+                ]),
           ]}
           scroll={{ x: 950 }}
         />

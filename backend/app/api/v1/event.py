@@ -3,6 +3,7 @@ from app.utils.store import get_request_store_id
 Point mutations stay in GambitServer transactions; OA never independently awards points.
 """
 from datetime import datetime
+import json
 from zoneinfo import ZoneInfo
 from flask import Blueprint, jsonify, request
 from sqlalchemy import text
@@ -109,6 +110,32 @@ def save_config(table, item_id=None):
     except IntegrityError:
         return bad('名称已存在，请使用其他名称')
 
+
+# Read both immutable report snapshots and legacy check-ins without writing back
+# or awarding points. Source is part of the event identity (IDs can overlap).
+EVENT_SOURCE = """(SELECT id,code,project_id,store_id,points,status,created_at,started_at,ended_at,
+    'checkin' source,NULL total_points FROM store_events
+    UNION ALL
+    SELECT id,event_key,project_id,store_id,NULL,status,created_at,issued_at,issued_at,
+    'report' source,total_points FROM event_reports WHERE status='issued' AND issued_at IS NOT NULL)"""
+
+def participation_source():
+    if db.engine.dialect.name == 'sqlite':
+        report_rows = """SELECT r.id event_id,'report' source,
+          CAST(json_extract(j.value,'$.UserID') AS INTEGER) user_id,
+          CAST(json_extract(j.value,'$.Rank') AS INTEGER) `rank`,'' deck_name
+          FROM event_reports r JOIN json_each(r.snapshot,'$.Rows') j
+          WHERE r.status='issued' AND json_extract(j.value,'$.UserID')>0"""
+    else:
+        report_rows = """SELECT r.id event_id,'report' source,j.user_id,j.rank_value `rank`,'' deck_name
+          FROM event_reports r JOIN JSON_TABLE(r.snapshot,'$.Rows[*]' COLUMNS(
+            user_id INT PATH '$.UserID',rank_value INT PATH '$.Rank')) j ON TRUE
+          WHERE r.status='issued' AND j.user_id>0"""
+    return "(SELECT event_id,'checkin' source,user_id,`rank`,deck_name FROM event_checkins UNION ALL " + report_rows + ")"
+
+def attendance_join(participant='c', event='e'):
+    return f"{participation_source()} {participant} JOIN {EVENT_SOURCE} {event} ON {event}.id={participant}.event_id AND {event}.source={participant}.source"
+
 EVENT_FILTER = 'e.project_id=:project AND (:store=0 OR e.store_id=:store)'
 
 @event_bp.route('/events', methods=['GET'])
@@ -119,10 +146,10 @@ def events():
     except (ValueError, TypeError):
         return bad('项目、门店或月份无效')
     return ok({'Items':rows(f'''SELECT e.id,e.code,e.project_id,e.store_id,s.name store_name,e.points,e.status,
-      e.created_at,e.started_at,e.ended_at,COUNT(c.id) participants
-      FROM store_events e JOIN stores s ON s.id=e.store_id JOIN event_checkins c ON c.event_id=e.id
+      e.created_at,e.started_at,e.ended_at,e.source,e.total_points,COUNT(*) participants
+      FROM {attendance_join()} JOIN stores s ON s.id=e.store_id
       WHERE {EVENT_FILTER} AND COALESCE(e.started_at,e.created_at)>=:start AND COALESCE(e.started_at,e.created_at)<:end
-      GROUP BY e.id,s.name ORDER BY COALESCE(e.started_at,e.created_at) DESC,e.id DESC''', **args)})
+      GROUP BY e.id,e.source,e.code,e.project_id,e.store_id,e.points,e.status,e.created_at,e.started_at,e.ended_at,e.total_points,s.name ORDER BY COALESCE(e.started_at,e.created_at) DESC,e.id DESC''', **args)})
 
 @event_bp.route('/events/<int:event_id>', methods=['GET'])
 @login_required('events')
@@ -135,6 +162,25 @@ def event_detail(event_id):
     participants = rows('''SELECT c.*,u.nick_name,u.avatar,u.phone_number FROM event_checkins c
       JOIN users u ON u.id=c.user_id WHERE c.event_id=:id ORDER BY c.rank IS NULL,c.rank,c.created_at,c.id''', id=event_id)
     return ok({'Event':event[0], 'Items':[profile(p) for p in participants]})
+
+@event_bp.route('/reports/<int:report_id>', methods=['GET'])
+@login_required('events')
+def report_detail(report_id):
+    reports = rows('''SELECT r.id,r.event_key code,r.project_id,r.store_id,r.status,
+      r.total_points,r.player_count,r.created_at,r.issued_at started_at,r.snapshot,
+      s.name store_name,p.name project_name FROM event_reports r
+      JOIN stores s ON s.id=r.store_id JOIN event_projects p ON p.id=r.project_id
+      WHERE r.id=:id AND r.store_id=:sid AND r.status='issued' ''',
+      id=report_id, sid=get_request_store_id())
+    if not reports:
+        return bad('赛事回传记录不存在')
+    event = reports[0]
+    snapshot = json.loads(event.pop('snapshot'))
+    event['source'] = 'report'
+    items = [dict(id=r['UserID'], user_id=r['UserID'], nick_name=r.get('NickName', ''),
+                  screenshot_name=r.get('Name', ''), card_id=r['CardID'], rank=r['Rank'],
+                  points=r['Points'], created_at=event['started_at']) for r in snapshot['Rows']]
+    return ok({'Event':event, 'Items':sorted(items, key=lambda r:(r['rank'],r['user_id']))})
 
 @event_bp.route('/participants/<int:checkin_id>', methods=['PUT'])
 @login_required('events')
@@ -166,39 +212,38 @@ def dashboard():
         args=scope()
     except (ValueError,TypeError):
         return bad('请选择有效的项目、门店和月份')
-    # All cohorts use the event's first successful check-in as the event date.
-    pairs=rows(f'''SELECT c.user_id,c.event_id,e.started_at FROM event_checkins c JOIN store_events e ON e.id=c.event_id
+    # Check-ins use first attendance; reports use successful issue time, not draft creation.
+    pairs=rows(f'''SELECT c.user_id,c.event_id,c.source,e.started_at FROM {attendance_join()}
       WHERE {EVENT_FILTER} AND e.started_at>=:previous AND e.started_at<:end''',**args)
     start=args['start'].strftime('%Y-%m-%d %H:%M:%S')
     current=[p for p in pairs if p['started_at']>=start]
     before={p['user_id'] for p in pairs if p['started_at']<start}
     users={p['user_id'] for p in current}
     continuous=users&before
-    event_rank=rows(f'''SELECT e.id,e.code,e.started_at,s.name store_name,COUNT(*) participants FROM event_checkins c
-      JOIN store_events e ON e.id=c.event_id JOIN stores s ON s.id=e.store_id
+    event_rank=rows(f'''SELECT e.id,e.source,e.code,e.started_at,s.name store_name,COUNT(*) participants FROM {attendance_join()} JOIN stores s ON s.id=e.store_id
       WHERE {EVENT_FILTER} AND e.started_at>=:start AND e.started_at<:end
-      GROUP BY e.id,s.name ORDER BY participants DESC,e.started_at DESC''',**args)
+      GROUP BY e.id,e.source,e.code,e.started_at,s.name ORDER BY participants DESC,e.started_at DESC''',**args)
     active=rows(f'''SELECT u.id user_id,u.nick_name,COUNT(*) events,MAX(e.started_at) last_event_at,
-      MAX(ci.card_id) card_id FROM event_checkins c JOIN store_events e ON e.id=c.event_id JOIN users u ON u.id=c.user_id
+      MAX(ci.card_id) card_id FROM {attendance_join()} JOIN users u ON u.id=c.user_id
       LEFT JOIN player_card_ids ci ON ci.user_id=u.id AND ci.project_id=:project
       WHERE {EVENT_FILTER} AND e.started_at>=:start AND e.started_at<:end
       GROUP BY u.id,u.nick_name ORDER BY events DESC,u.id''',**args)
     recall=rows(f'''SELECT u.id user_id,u.nick_name,u.phone_number,ci.card_id,MAX(e.started_at) last_event_at,COUNT(*) previous_events
-      FROM event_checkins c JOIN store_events e ON e.id=c.event_id JOIN users u ON u.id=c.user_id
+      FROM {attendance_join()} JOIN users u ON u.id=c.user_id
       LEFT JOIN player_card_ids ci ON ci.user_id=u.id AND ci.project_id=:project
       WHERE {EVENT_FILTER} AND e.started_at>=:previous AND e.started_at<:start
-      AND NOT EXISTS (SELECT 1 FROM event_checkins nc JOIN store_events ne ON ne.id=nc.event_id
+      AND NOT EXISTS (SELECT 1 FROM {attendance_join("nc", "ne")}
         WHERE nc.user_id=c.user_id AND ne.project_id=:project AND (:store=0 OR ne.store_id=:store)
         AND ne.started_at>=:start AND ne.started_at<:end)
       GROUP BY u.id,u.nick_name,u.phone_number,ci.card_id ORDER BY last_event_at DESC,u.id''',**args)
-    new=rows(f'''SELECT COUNT(*) count FROM (SELECT c.user_id FROM event_checkins c JOIN store_events e ON e.id=c.event_id
+    new=rows(f'''SELECT COUNT(*) count FROM (SELECT c.user_id FROM {attendance_join()}
       WHERE {EVENT_FILTER} GROUP BY c.user_id HAVING MIN(e.started_at)>=:start AND MIN(e.started_at)<:end) first_players''',**args)[0]['count']
     decks=rows(f'''SELECT TRIM(c.deck_name) name,COUNT(*) count,
       COUNT(CASE WHEN c.`rank`=1 THEN 1 END) champions,
       COUNT(CASE WHEN c.`rank`=2 THEN 1 END) runners_up,
       COUNT(CASE WHEN c.`rank` BETWEEN 1 AND 4 THEN 1 END) top_four,
       COUNT(CASE WHEN c.`rank` BETWEEN 1 AND 8 THEN 1 END) top_eight
-      FROM event_checkins c JOIN store_events e ON e.id=c.event_id WHERE {EVENT_FILTER}
+      FROM {attendance_join()} WHERE {EVENT_FILTER}
       AND e.started_at>=:start AND e.started_at<:end
       AND NULLIF(TRIM(c.deck_name),'') IS NOT NULL
       GROUP BY TRIM(c.deck_name) ORDER BY count DESC,name ASC''',**args)
