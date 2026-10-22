@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 from zoneinfo import ZoneInfo
 from flask import Blueprint, jsonify, request
-from sqlalchemy import text
+from sqlalchemy import text, bindparam
 from sqlalchemy.exc import IntegrityError
 from app import db
 from app.middlewares.auth import login_required
@@ -120,18 +120,31 @@ EVENT_SOURCE = """(SELECT id,code,project_id,store_id,points,status,created_at,s
     'report' source,total_points FROM event_reports WHERE status='issued' AND issued_at IS NOT NULL)"""
 
 def participation_source():
-    if db.engine.dialect.name == 'sqlite':
+    # Official player IDs are snapshot identities. A later Gambit binding must not
+    # change cohorts. Legacy check-ins without a card retain a separate GB identity.
+    sqlite = db.engine.dialect.name == 'sqlite'
+    if sqlite:
         report_rows = """SELECT r.id event_id,'report' source,
           CAST(json_extract(j.value,'$.UserID') AS INTEGER) user_id,
-          CAST(json_extract(j.value,'$.Rank') AS INTEGER) `rank`,'' deck_name
-          FROM event_reports r JOIN json_each(r.snapshot,'$.Rows') j
-          WHERE r.status='issued' AND json_extract(j.value,'$.UserID')>0"""
+          CAST(json_extract(j.value,'$.Rank') AS INTEGER) `rank`,'' deck_name,
+          json_extract(j.value,'$.CardID') card_id,
+          COALESCE(NULLIF(json_extract(j.value,'$.NickName'),''),json_extract(j.value,'$.Name'),'') nick_name,
+          CAST(j.key AS TEXT) row_id
+          FROM event_reports r JOIN json_each(r.snapshot,'$.Rows') j WHERE r.status='issued'"""
+        identity = "CASE WHEN NULLIF(TRIM(card_id),'') IS NOT NULL THEN 'card:' || LOWER(TRIM(card_id)) WHEN user_id>0 THEN 'gb:' || user_id ELSE source || ':' || event_id || ':' || row_id END"
     else:
-        report_rows = """SELECT r.id event_id,'report' source,j.user_id,j.rank_value `rank`,'' deck_name
+        report_rows = """SELECT r.id event_id,'report' source,j.user_id,j.rank_value `rank`,'' deck_name,
+          j.card_id,COALESCE(NULLIF(j.nick_name,''),j.screenshot_name,'') nick_name,j.row_id
           FROM event_reports r JOIN JSON_TABLE(r.snapshot,'$.Rows[*]' COLUMNS(
-            user_id INT PATH '$.UserID',rank_value INT PATH '$.Rank')) j ON TRUE
-          WHERE r.status='issued' AND j.user_id>0"""
-    return "(SELECT event_id,'checkin' source,user_id,`rank`,deck_name FROM event_checkins UNION ALL " + report_rows + ")"
+            row_id FOR ORDINALITY,user_id INT PATH '$.UserID',rank_value INT PATH '$.Rank',
+            card_id VARCHAR(80) PATH '$.CardID',nick_name VARCHAR(255) PATH '$.NickName',
+            screenshot_name VARCHAR(255) PATH '$.Name')) j ON TRUE WHERE r.status='issued'"""
+        identity = "CASE WHEN NULLIF(TRIM(card_id),'') IS NOT NULL THEN CONCAT('card:',LOWER(TRIM(card_id))) WHEN user_id>0 THEN CONCAT('gb:',user_id) ELSE CONCAT(source,':',event_id,':',row_id) END"
+    base = "SELECT c.event_id,'checkin' source,c.user_id,c.`rank`,c.deck_name,c.card_id,COALESCE(u.nick_name,'') nick_name,c.id row_id FROM event_checkins c LEFT JOIN users u ON u.id=c.user_id UNION ALL " + report_rows
+    # Defensive per-event dedup also handles overlapping legacy report snapshots.
+    return f"""(SELECT event_id,source,{identity} identity_key,MAX(user_id) user_id,
+      MIN(`rank`) `rank`,MAX(deck_name) deck_name,MAX(TRIM(card_id)) card_id,MAX(nick_name) nick_name
+      FROM ({base}) raw_participants GROUP BY event_id,source,{identity})"""
 
 def attendance_join(participant='c', event='e'):
     return f"{participation_source()} {participant} JOIN {EVENT_SOURCE} {event} ON {event}.id={participant}.event_id AND {event}.source={participant}.source"
@@ -177,9 +190,9 @@ def report_detail(report_id):
     event = reports[0]
     snapshot = json.loads(event.pop('snapshot'))
     event['source'] = 'report'
-    items = [dict(id=r['UserID'], user_id=r['UserID'], nick_name=r.get('NickName', ''),
+    items = [dict(id=i, user_id=r['UserID'], nick_name=r.get('NickName', '') or '未匹配',
                   screenshot_name=r.get('Name', ''), card_id=r['CardID'], rank=r['Rank'],
-                  points=r['Points'], created_at=event['started_at']) for r in snapshot['Rows']]
+                  points=r['Points'], created_at=event['started_at']) for i,r in enumerate(snapshot['Rows'], 1)]
     return ok({'Event':event, 'Items':sorted(items, key=lambda r:(r['rank'],r['user_id']))})
 
 @event_bp.route('/participants/<int:checkin_id>', methods=['PUT'])
@@ -205,6 +218,33 @@ def participant(checkin_id):
     except (ValueError,TypeError) as e:
         return bad(str(e))
 
+def refresh_cohort_profiles(participants, project):
+    """Resolve display-only profiles on every read, without changing attendance snapshots."""
+    cards = sorted({p['identity_key'][5:] for p in participants if p['identity_key'].startswith('card:')})
+    legacy = sorted({int(p['identity_key'][3:]) for p in participants if p['identity_key'].startswith('gb:')})
+    profiles = {}
+    for identities, official in ((cards, True), (legacy, False)):
+        for offset in range(0, len(identities), 500):
+            if official:
+                sql = """SELECT LOWER(TRIM(ci.card_id)) identity_value,u.id user_id,u.nick_name,u.phone_number
+                  FROM player_card_ids ci JOIN users u ON u.id=ci.user_id AND u.deleted_at IS NULL
+                  WHERE ci.project_id=:project AND LOWER(TRIM(ci.card_id)) IN :identities"""
+            else:
+                sql = """SELECT id identity_value,id user_id,nick_name,phone_number FROM users
+                  WHERE deleted_at IS NULL AND id IN :identities"""
+            query = text(sql).bindparams(bindparam('identities', expanding=True))
+            found = db.session.execute(query, {'project':project,'identities':identities[offset:offset+500]}).mappings()
+            for person in found:
+                key = ('card:' if official else 'gb:') + str(person['identity_value'])
+                profiles.setdefault(key, {})[person['user_id']] = person
+    for participant in participants:
+        matches = profiles.get(participant['identity_key'], {})
+        # Ambiguous bindings must never display an arbitrary player's identity/contact.
+        person = next(iter(matches.values())) if len(matches) == 1 else None
+        participant.update(user_id=person['user_id'] if person else 0,
+                           nick_name=(person['nick_name'] or '未填写昵称') if person else '未匹配',
+                           phone_number=person['phone_number'] if person else None)
+
 @event_bp.route('/dashboard', methods=['GET'])
 @login_required('events')
 def dashboard():
@@ -212,32 +252,35 @@ def dashboard():
         args=scope()
     except (ValueError,TypeError):
         return bad('请选择有效的项目、门店和月份')
-    # Check-ins use first attendance; reports use successful issue time, not draft creation.
-    pairs=rows(f'''SELECT c.user_id,c.event_id,c.source,e.started_at FROM {attendance_join()}
-      WHERE {EVENT_FILTER} AND e.started_at>=:previous AND e.started_at<:end''',**args)
+    # Only the two cohort months are loaded; first attendance is aggregated in SQL.
+    pairs=rows(f'''SELECT c.*,e.started_at FROM {attendance_join()}
+      WHERE {EVENT_FILTER} AND e.started_at>=:previous AND e.started_at<:end
+      ORDER BY e.started_at,c.event_id,c.source''',**args)
     start=args['start'].strftime('%Y-%m-%d %H:%M:%S')
     current=[p for p in pairs if p['started_at']>=start]
-    before={p['user_id'] for p in pairs if p['started_at']<start}
-    users={p['user_id'] for p in current}
+    previous=[p for p in pairs if p['started_at']<start]
+    before={p['identity_key'] for p in previous}
+    users={p['identity_key'] for p in current}
     continuous=users&before
     event_rank=rows(f'''SELECT e.id,e.source,e.code,e.started_at,s.name store_name,COUNT(*) participants FROM {attendance_join()} JOIN stores s ON s.id=e.store_id
       WHERE {EVENT_FILTER} AND e.started_at>=:start AND e.started_at<:end
       GROUP BY e.id,e.source,e.code,e.started_at,s.name ORDER BY participants DESC,e.started_at DESC''',**args)
-    active=rows(f'''SELECT u.id user_id,u.nick_name,COUNT(*) events,MAX(e.started_at) last_event_at,
-      MAX(ci.card_id) card_id FROM {attendance_join()} JOIN users u ON u.id=c.user_id
-      LEFT JOIN player_card_ids ci ON ci.user_id=u.id AND ci.project_id=:project
-      WHERE {EVENT_FILTER} AND e.started_at>=:start AND e.started_at<:end
-      GROUP BY u.id,u.nick_name ORDER BY events DESC,u.id''',**args)
-    recall=rows(f'''SELECT u.id user_id,u.nick_name,u.phone_number,ci.card_id,MAX(e.started_at) last_event_at,COUNT(*) previous_events
-      FROM {attendance_join()} JOIN users u ON u.id=c.user_id
-      LEFT JOIN player_card_ids ci ON ci.user_id=u.id AND ci.project_id=:project
-      WHERE {EVENT_FILTER} AND e.started_at>=:previous AND e.started_at<:start
-      AND NOT EXISTS (SELECT 1 FROM {attendance_join("nc", "ne")}
-        WHERE nc.user_id=c.user_id AND ne.project_id=:project AND (:store=0 OR ne.store_id=:store)
-        AND ne.started_at>=:start AND ne.started_at<:end)
-      GROUP BY u.id,u.nick_name,u.phone_number,ci.card_id ORDER BY last_event_at DESC,u.id''',**args)
-    new=rows(f'''SELECT COUNT(*) count FROM (SELECT c.user_id FROM {attendance_join()}
-      WHERE {EVENT_FILTER} GROUP BY c.user_id HAVING MIN(e.started_at)>=:start AND MIN(e.started_at)<:end) first_players''',**args)[0]['count']
+    def cohorts(participants, count_key):
+        grouped={}
+        for p in participants:
+            key=p['identity_key']
+            count=grouped.get(key,{}).get(count_key,0)+1
+            grouped[key]=dict(identity_key=key,card_id=p['card_id'] or '',
+              last_event_at=p['started_at'],**{count_key:count})
+        return list(grouped.values())
+    active=cohorts(current,'events')
+    active.sort(key=lambda r:(-r['events'],r['identity_key']))
+    recall=cohorts([p for p in previous if p['identity_key'] not in users],'previous_events')
+    recall.sort(key=lambda r:(r['last_event_at'],r['identity_key']),reverse=True)
+    refresh_cohort_profiles(active + recall, args['project'])
+    for r in active: r.pop('phone_number',None)
+    new=rows(f'''SELECT COUNT(*) count FROM (SELECT c.identity_key FROM {attendance_join()}
+      WHERE {EVENT_FILTER} GROUP BY c.identity_key HAVING MIN(e.started_at)>=:start AND MIN(e.started_at)<:end) first_players''',**args)[0]['count']
     decks=rows(f'''SELECT TRIM(c.deck_name) name,COUNT(*) count,
       COUNT(CASE WHEN c.`rank`=1 THEN 1 END) champions,
       COUNT(CASE WHEN c.`rank`=2 THEN 1 END) runners_up,
