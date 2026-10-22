@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 from zoneinfo import ZoneInfo
 from flask import Blueprint, jsonify, request
-from sqlalchemy import text
+from sqlalchemy import text, bindparam
 from sqlalchemy.exc import IntegrityError
 from app import db
 from app.middlewares.auth import login_required
@@ -218,6 +218,33 @@ def participant(checkin_id):
     except (ValueError,TypeError) as e:
         return bad(str(e))
 
+def refresh_cohort_profiles(participants, project):
+    """Resolve display-only profiles on every read, without changing attendance snapshots."""
+    cards = sorted({p['identity_key'][5:] for p in participants if p['identity_key'].startswith('card:')})
+    legacy = sorted({int(p['identity_key'][3:]) for p in participants if p['identity_key'].startswith('gb:')})
+    profiles = {}
+    for identities, official in ((cards, True), (legacy, False)):
+        for offset in range(0, len(identities), 500):
+            if official:
+                sql = """SELECT LOWER(TRIM(ci.card_id)) identity_value,u.id user_id,u.nick_name,u.phone_number
+                  FROM player_card_ids ci JOIN users u ON u.id=ci.user_id AND u.deleted_at IS NULL
+                  WHERE ci.project_id=:project AND LOWER(TRIM(ci.card_id)) IN :identities"""
+            else:
+                sql = """SELECT id identity_value,id user_id,nick_name,phone_number FROM users
+                  WHERE deleted_at IS NULL AND id IN :identities"""
+            query = text(sql).bindparams(bindparam('identities', expanding=True))
+            found = db.session.execute(query, {'project':project,'identities':identities[offset:offset+500]}).mappings()
+            for person in found:
+                key = ('card:' if official else 'gb:') + str(person['identity_value'])
+                profiles.setdefault(key, {})[person['user_id']] = person
+    for participant in participants:
+        matches = profiles.get(participant['identity_key'], {})
+        # Ambiguous bindings must never display an arbitrary player's identity/contact.
+        person = next(iter(matches.values())) if len(matches) == 1 else None
+        participant.update(user_id=person['user_id'] if person else 0,
+                           nick_name=(person['nick_name'] or '未填写昵称') if person else '未匹配',
+                           phone_number=person['phone_number'] if person else None)
+
 @event_bp.route('/dashboard', methods=['GET'])
 @login_required('events')
 def dashboard():
@@ -226,8 +253,7 @@ def dashboard():
     except (ValueError,TypeError):
         return bad('请选择有效的项目、门店和月份')
     # Only the two cohort months are loaded; first attendance is aggregated in SQL.
-    pairs=rows(f'''SELECT c.*,u.phone_number,e.started_at FROM {attendance_join()}
-      LEFT JOIN users u ON u.id=c.user_id
+    pairs=rows(f'''SELECT c.*,e.started_at FROM {attendance_join()}
       WHERE {EVENT_FILTER} AND e.started_at>=:previous AND e.started_at<:end
       ORDER BY e.started_at,c.event_id,c.source''',**args)
     start=args['start'].strftime('%Y-%m-%d %H:%M:%S')
@@ -245,14 +271,14 @@ def dashboard():
             key=p['identity_key']
             count=grouped.get(key,{}).get(count_key,0)+1
             grouped[key]=dict(identity_key=key,card_id=p['card_id'] or '',
-              user_id=p['user_id'] or 0,nick_name=p['nick_name'],phone_number=p['phone_number'],
               last_event_at=p['started_at'],**{count_key:count})
         return list(grouped.values())
     active=cohorts(current,'events')
     active.sort(key=lambda r:(-r['events'],r['identity_key']))
-    for r in active: r.pop('phone_number',None)
     recall=cohorts([p for p in previous if p['identity_key'] not in users],'previous_events')
     recall.sort(key=lambda r:(r['last_event_at'],r['identity_key']),reverse=True)
+    refresh_cohort_profiles(active + recall, args['project'])
+    for r in active: r.pop('phone_number',None)
     new=rows(f'''SELECT COUNT(*) count FROM (SELECT c.identity_key FROM {attendance_join()}
       WHERE {EVENT_FILTER} GROUP BY c.identity_key HAVING MIN(e.started_at)>=:start AND MIN(e.started_at)<:end) first_players''',**args)[0]['count']
     decks=rows(f'''SELECT TRIM(c.deck_name) name,COUNT(*) count,
