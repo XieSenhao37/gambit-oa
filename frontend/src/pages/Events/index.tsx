@@ -151,9 +151,9 @@ export default function Events() {
     cfgForm.setFieldsValue(row || { name: '', status: 1, sort: 0 });
   };
   const identity = [
-    { title: '玩家编号', dataIndex: 'user_id' },
+    { title: '赛事 ID', dataIndex: 'card_id', render: (v: string) => v || '历史记录未填写' },
     { title: '昵称', dataIndex: 'nick_name' },
-    { title: '卡牌 ID', dataIndex: 'card_id' },
+    { title: 'Gambit 玩家 ID', dataIndex: 'user_id', render: (v: number) => v || '未匹配' },
   ];
   const eventColumns = [
     {
@@ -193,7 +193,7 @@ export default function Events() {
       dataIndex: 'status',
       render: (v: string) => (
         <Tag>
-          {v === 'issued' ? '已发放' : v === 'ended' ? '已结束' : '可签到'}
+          {v === 'issued' ? '已记录' : v === 'ended' ? '已结束' : '可签到'}
         </Tag>
       ),
     },
@@ -274,7 +274,7 @@ export default function Events() {
                   <Text type="secondary">
                     MAU 按参赛人次累加；连续 UU
                     为相邻两个月均参赛的玩家；回归率＝连续
-                    UU／上月去重玩家数。签到按首位成功签到时间、回传按积分发放时间归属月份；未发放回传和空赛事不计入。
+                    UU／上月去重玩家数。按赛事 ID 去重，未匹配 Gambit 的玩家同样计入；历史签到未填赛事 ID 时按 Gambit ID 单独统计。签到按首位签到时间、回传按确认记录时间归属月份，草稿和空赛事不计入。
                   </Text>
                 </Card>
                 <Card
@@ -294,7 +294,7 @@ export default function Events() {
                   style={{ marginTop: 16 }}
                 >
                   <Table
-                    rowKey="user_id"
+                    rowKey="identity_key"
                     dataSource={data?.ActivePlayers || []}
                     columns={[
                       ...identity,
@@ -312,7 +312,7 @@ export default function Events() {
                   style={{ marginTop: 16 }}
                 >
                   <Table
-                    rowKey="user_id"
+                    rowKey="identity_key"
                     dataSource={data?.RecallPlayers || []}
                     columns={[
                       ...identity,
@@ -455,7 +455,7 @@ export default function Events() {
       >
         <Text type="secondary">
           {detail?.Event.source === 'report'
-            ? '赛事回传为发放时的确认结果，仅供查看；不重复发放积分。'
+            ? '赛事回传保留确认时的完整名单；未匹配 Gambit 的玩家仅记录参赛，不发积分。'
             : '签到 ID 为当次参赛快照；修改名次与卡组不会自动发放积分。允许并列名次。'}
         </Text>
         <Table
