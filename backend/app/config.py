@@ -11,6 +11,12 @@ class Config:
     # 数据库配置
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # 云数据库/网络可能关闭空闲连接；在业务事务开始前检查并替换失效连接。
+    # 不重放请求，避免短信发送和其他写操作被重复执行。
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
 
 
     # 跨域配置
