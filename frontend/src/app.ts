@@ -149,7 +149,11 @@ export const request: RequestConfig = {
   errorConfig: {
     // 错误处理
     errorHandler: (error: any, options) => {
-      if (options.skipErrorHandler && error.response?.status !== 401)
+      if (
+        options.skipErrorHandler &&
+        (error.response?.status !== 401 ||
+          window.location.pathname === '/login')
+      )
         throw error;
       // 处理业务错误码
       if (error.response) {

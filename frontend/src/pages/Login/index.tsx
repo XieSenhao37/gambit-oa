@@ -1,5 +1,11 @@
 import logo from '@/assets/logo.png';
-import { authStatus, login, sendCode } from '@/services/auth';
+import {
+  authErrorMessage,
+  authResultUncertain,
+  authStatus,
+  login,
+  sendCode,
+} from '@/services/auth';
 import { Alert, Button, Form, Input, message, Space } from 'antd';
 import { useEffect, useState } from 'react';
 
@@ -47,6 +53,12 @@ export default function LoginPage() {
       setSentPhone(phone);
       setCount(r.Data.RetryAfter);
       message.success('验证码已发送');
+    } catch (error) {
+      if (authResultUncertain(error)) {
+        setChallenge('');
+        setCount(60);
+      }
+      message.error(authErrorMessage(error, 'send'));
     } finally {
       setSending(false);
     }
@@ -74,8 +86,8 @@ export default function LoginPage() {
       sessionStorage.removeItem('oa_session_expired');
       localStorage.removeItem('role');
       window.location.replace('/');
-    } catch {
-      // The shared request handler displays the server's error; never log credentials.
+    } catch (error) {
+      message.error(authErrorMessage(error, 'login'));
     } finally {
       setLoading(false);
     }
@@ -85,7 +97,13 @@ export default function LoginPage() {
       <div style={{ textAlign: 'center' }}>
         <img src={logo} alt="Gambit" width={100} />
         <h2>GAMBIT OA</h2>
-        <p>{mode === 'sms' ? '员工手机号验证码登录' : '管理员账号登录'}</p>
+        <p>
+          {mode === 'sms'
+            ? '员工手机号验证码登录'
+            : mode === 'password'
+            ? '管理员账号登录'
+            : '员工登录'}
+        </p>
       </div>
       {expired && (
         <Alert
