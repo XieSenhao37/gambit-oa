@@ -127,7 +127,7 @@ export default function RentalEditor({
     <div className="oa-inventory-extras">
       <Form.Item label="出售品相">
         <AutoComplete
-          disabled={busy || !r.PurchaseEnabled}
+          disabled={busy}
           aria-label={`${r.Name}出售品相`}
           value={r.Condition || undefined}
           placeholder="选择或输入品相"
@@ -347,7 +347,7 @@ export default function RentalEditor({
                         })
                       }
                     />
-                    {r.RentalEnabled && currency(r, 'RentalPrice')}
+                    {currency(r, 'RentalPrice')}
                   </Space>
                 ),
               },
@@ -367,7 +367,7 @@ export default function RentalEditor({
                         })
                       }
                     />
-                    {r.PurchaseEnabled && currency(r, 'PurchasePrice')}
+                    {currency(r, 'PurchasePrice')}
                   </Space>
                 ),
               },
@@ -451,18 +451,16 @@ export default function RentalEditor({
                   }
                 />
               </div>
-              {r.RentalEnabled && (
-                <GridRow gutter={24}>
-                  <Col span={12}>
-                    <Form.Item label="日租金">
-                      {currency(r, 'RentalPrice')}
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item label="押金">{currency(r, 'Deposit')}</Form.Item>
-                  </Col>
-                </GridRow>
-              )}
+              <GridRow gutter={24}>
+                <Col span={12}>
+                  <Form.Item label="日租金">
+                    {currency(r, 'RentalPrice')}
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item label="押金">{currency(r, 'Deposit')}</Form.Item>
+                </Col>
+              </GridRow>
             </section>
             <section className="oa-inventory-section">
               <div className="oa-inventory-option">
@@ -479,12 +477,8 @@ export default function RentalEditor({
                   }
                 />
               </div>
-              {r.PurchaseEnabled && (
-                <Form.Item label="售价">
-                  {currency(r, 'PurchasePrice')}
-                </Form.Item>
-              )}
-              {r.PurchaseEnabled && extraFields(r)}
+              <Form.Item label="售价">{currency(r, 'PurchasePrice')}</Form.Item>
+              {extraFields(r)}
             </section>
           </Form>
         ))
