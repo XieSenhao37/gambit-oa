@@ -1,4 +1,4 @@
-import { getCurrentStoreId, rememberPageStore } from '@/utils/pageStores';
+import { getCurrentStoreId, rememberCurrentStore } from '@/utils/pageStores';
 import { visitGameTodo } from '@/utils/visitGameTodo';
 import {
   ArrowRightOutlined,
@@ -19,7 +19,7 @@ export default function TodayTodos() {
   const canVisitCurrent = currentStore?.Pages.includes('game-service-orders');
   const visitFilter = (status: string) => {
     if (!auth || !canVisitCurrent) return;
-    rememberPageStore(auth.UserId, 'game-service-orders', getCurrentStoreId());
+    rememberCurrentStore(auth.UserId, getCurrentStoreId());
     history.push(`/game-service-orders?status=${status}`);
   };
   return (

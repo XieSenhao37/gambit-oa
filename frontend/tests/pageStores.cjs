@@ -16,14 +16,26 @@ assert.deepEqual(Array.from(api.getPageStores(stores, 'staff-access')), []);
 assert.equal(api.choosePageStore(api.getPageStores(stores, 'dashboard'), 1), b);
 assert.equal(api.choosePageStore(stores, 2), b);
 assert.equal(api.choosePageStore([], 2), undefined);
-api.rememberPageStore(1, 'workbench', 1);
-api.rememberPageStore(1, 'dashboard', 2);
-assert.equal(api.getPreferredStore(1, 'workbench'), 1);
-assert.equal(api.getPreferredStore(1, 'dashboard'), 2);
-assert.equal(api.getPreferredStore(2, 'dashboard'), undefined);
-// 撤销原先选中门店的页面权限后必须回落到有权限的门店。
+// One account preference is shared by every module; old per-page choices do not override it.
+storage.set('oa_page_store:1:workbench', '1');
+storage.set('oa_page_store:1:dashboard', '2');
+assert.equal(api.getPreferredStore(1), undefined);
+let notifications = 0;
+const unsubscribe = api.subscribeStoreChanges(() => notifications++);
+api.rememberCurrentStore(1, 2);
+assert.equal(api.getPreferredStore(1), 2);
+assert.equal(api.choosePageStore(api.getPageStores(stores, 'workbench'), api.getPreferredStore(1)), b);
+assert.equal(api.choosePageStore(api.getPageStores(stores, 'dashboard'), api.getPreferredStore(1)), b);
+assert.equal(api.getPreferredStore(2), undefined);
+assert.equal(notifications, 1);
+api.rememberCurrentStore(1, 2);
+assert.equal(notifications, 1, 'selecting the same store does not reload content');
+// Revoked permissions still fall back only to a store allowed for the target module.
 assert.equal(api.choosePageStore(api.getPageStores([a], 'workbench'), 2), a);
 api.setCurrentStoreId(2);
 assert.equal(api.getCurrentStoreId(), 2);
-assert.equal(api.getPreferredStore(1, 'workbench'), 1);
-console.log('Per-page stores, mixed roles, revocation and independent preference checks passed');
+assert.equal(api.getPreferredStore(1), 2);
+unsubscribe();
+api.rememberCurrentStore(1, 1);
+assert.equal(notifications, 1, 'unmounted listeners are removed');
+console.log('Global store preference, subscriptions, account isolation and permission fallback checks passed');

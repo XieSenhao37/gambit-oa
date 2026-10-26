@@ -2,12 +2,13 @@ import FunctionSearch from '@/components/FunctionSearch';
 import GameOrderTodos from '@/components/GameOrderTodos';
 import StoreSwitcher from '@/components/StoreSwitcher';
 import pages from '@/config/pages.json';
+import usePreferredStore from '@/hooks/usePreferredStore';
 import { getMe } from '@/services/auth';
 import {
   choosePageStore,
   getAllowedPages,
   getPageStores,
-  getPreferredStore,
+  rememberCurrentStore,
   setCurrentStoreId,
 } from '@/utils/pageStores';
 import { Navigate, Outlet, useLocation, useModel } from '@umijs/max';
@@ -17,20 +18,22 @@ export default function AuthWrapper() {
   const { initialState, setInitialState } = useModel('@@initialState');
   const location = useLocation();
   const auth = initialState?.auth;
+  const preferredStore = usePreferredStore(auth?.UserId);
   const page = pages.find((p) => p.path === location.pathname);
   const stores = getPageStores(auth?.Stores ?? [], page?.id ?? '');
-  const selected = choosePageStore(
-    stores,
-    auth && page ? getPreferredStore(auth.UserId, page.id) : undefined,
-  );
+  const selected = choosePageStore(stores, preferredStore);
   const contextKey = `${auth?.UserId}:${location.pathname}:${selected?.Id}`;
   const [readyContext, setReadyContext] = useState('');
   useEffect(() => {
     if (selected) {
       setCurrentStoreId(selected.Id);
+      // 权限撤销或当前模块不可访问时，切到有权限的门店并全局同步。
+      if (auth && page?.scope === 'store') {
+        rememberCurrentStore(auth.UserId, selected.Id);
+      }
       setReadyContext(contextKey);
     }
-  }, [contextKey, selected?.Id]);
+  }, [contextKey, selected?.Id, auth?.UserId, page?.scope]);
   useEffect(() => {
     const refresh = () => {
       getMe()
@@ -62,7 +65,6 @@ export default function AuthWrapper() {
     );
   }
   // 门店上下文准备好才挂载页面，防止首个请求携带上一页的门店。
-  if (readyContext !== contextKey) return null;
   return (
     <>
       <div className="oa-context-bar">
@@ -93,7 +95,7 @@ export default function AuthWrapper() {
         </div>
       </div>
       <div className="oa-content">
-        <Outlet key={contextKey} />
+        {readyContext === contextKey && <Outlet key={contextKey} />}
       </div>
     </>
   );

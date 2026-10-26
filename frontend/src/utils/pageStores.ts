@@ -1,7 +1,7 @@
 import type { AuthInfo } from '@/services/auth';
 
 type Store = AuthInfo['Stores'][number];
-// 当前标签页的请求上下文。不能读取其他标签页写入的全局门店值。
+// 当前标签页的有效请求上下文，在挂载业务内容前由权限包装器设置。
 let activeStoreId = 1;
 export const getCurrentStoreId = () => activeStoreId;
 export const setCurrentStoreId = (id: number) => {
@@ -14,9 +14,18 @@ export const getAllowedPages = (stores: Store[]) => [
 ];
 export const choosePageStore = (stores: Store[], preferred?: number) =>
   stores.find((store) => store.Id === preferred) ?? stores[0];
-const preferenceKey = (userId: number, pageId: string) =>
-  `oa_page_store:${userId}:${pageId}`;
-export const getPreferredStore = (userId: number, pageId: string) =>
-  Number(sessionStorage.getItem(preferenceKey(userId, pageId))) || undefined;
-export const rememberPageStore = (userId: number, pageId: string, id: number) =>
-  sessionStorage.setItem(preferenceKey(userId, pageId), String(id));
+const preferenceKey = (userId: number) => `oa_current_store:${userId}`;
+const listeners = new Set<() => void>();
+export const subscribeStoreChanges = (listener: () => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
+export const getPreferredStore = (userId: number) =>
+  Number(sessionStorage.getItem(preferenceKey(userId))) || undefined;
+export const rememberCurrentStore = (userId: number, id: number) => {
+  if (getPreferredStore(userId) === id) return;
+  sessionStorage.setItem(preferenceKey(userId), String(id));
+  listeners.forEach((listener) => listener());
+};

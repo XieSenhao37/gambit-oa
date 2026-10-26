@@ -1,6 +1,7 @@
 import type { GameTodo } from '@/models/gameTodos';
 import type { AuthInfo } from '@/services/auth';
-import { rememberPageStore } from './pageStores';
+import { history } from '@umijs/max';
+import { rememberCurrentStore } from './pageStores';
 
 export function visitGameTodo(auth: AuthInfo | undefined, item: GameTodo) {
   if (
@@ -11,6 +12,6 @@ export function visitGameTodo(auth: AuthInfo | undefined, item: GameTodo) {
     )
   )
     return;
-  rememberPageStore(auth.UserId, 'game-service-orders', item.StoreID);
-  window.location.assign(`/game-service-orders?orderId=${item.ID}`);
+  rememberCurrentStore(auth.UserId, item.StoreID);
+  history.push(`/game-service-orders?orderId=${item.ID}`);
 }

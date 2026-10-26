@@ -1,4 +1,4 @@
-import { getCurrentStoreId, rememberPageStore } from '@/utils/pageStores';
+import { getCurrentStoreId, rememberCurrentStore } from '@/utils/pageStores';
 import { SettingOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { history, useLocation, useModel } from '@umijs/max';
@@ -37,9 +37,8 @@ const WorkbenchPage: React.FC = () => {
             icon={<SettingOutlined />}
             onClick={() => {
               if (!initialState?.auth) return;
-              rememberPageStore(
+              rememberCurrentStore(
                 initialState.auth.UserId,
-                'play-pricing',
                 getCurrentStoreId(),
               );
               history.push('/play-pricing');

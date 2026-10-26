@@ -1,8 +1,9 @@
 import pages from '@/config/pages.json';
+import usePreferredStore from '@/hooks/usePreferredStore';
 import {
-  getCurrentStoreId,
+  choosePageStore,
   getPageStores,
-  rememberPageStore,
+  rememberCurrentStore,
 } from '@/utils/pageStores';
 import { useLocation, useModel } from '@umijs/max';
 import { Select } from 'antd';
@@ -14,7 +15,6 @@ interface StoreSwitcherProps {
   size?: 'small' | 'middle' | 'large';
   style?: CSSProperties;
   selectStyle?: CSSProperties;
-  onChange?: (storeId: number) => void;
 }
 export default function StoreSwitcher({
   label = '当前门店',
@@ -25,6 +25,7 @@ export default function StoreSwitcher({
   const { initialState } = useModel('@@initialState');
   const { pathname } = useLocation();
   const auth = initialState?.auth;
+  const preferredStore = usePreferredStore(auth?.UserId);
   const page = pages.find((p) => p.path === pathname);
   if (!auth || !page || page.scope !== 'store') return null;
   const stores = getPageStores(auth.Stores, page.id);
@@ -47,7 +48,7 @@ export default function StoreSwitcher({
       ) : (
         <Select
           aria-label={label}
-          value={getCurrentStoreId()}
+          value={choosePageStore(stores, preferredStore)?.Id}
           size={size}
           style={{ minWidth: 160, maxWidth: '100%', ...selectStyle }}
           options={stores.map((store) => ({
@@ -55,9 +56,7 @@ export default function StoreSwitcher({
             value: store.Id,
           }))}
           onChange={(id) => {
-            rememberPageStore(auth.UserId, page.id, id);
-            // 完整重载，丢弃旧门店的表单、弹窗与进行中的请求。
-            window.location.reload();
+            rememberCurrentStore(auth.UserId, id);
           }}
         />
       )}

@@ -1191,7 +1191,6 @@ const Dashboard = () => {
                 key="store"
                 label="统计门店"
                 selectStyle={{ width: 132 }}
-                onChange={fetchData}
               />,
             ]
           : []),
