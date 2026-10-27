@@ -83,7 +83,7 @@ def remote(payload):
         auth=json.loads(body)
         if status!=200 or auth.get('Data',{}).get('LoginMode')!='sms' or not auth['Data'].get('SmsReady'):
             raise RuntimeError('OA SMS login configuration check failed')
-        for path in ('/admin_api/game-service/v1/orders','/admin_api/game-service/v1/community','/admin_api/month-card/v1/config'):
+        for path in ('/admin_api/game-service/v1/orders','/admin_api/game-service/v1/community','/admin_api/month-card/v1/config','/admin_api/dish/v1/categories'):
             if http(base,path)[0]!=401:raise RuntimeError('Anonymous access guard failed')
         return {'version':version,'entry_assets':len(assets),'login_mode':'sms','sms_ready':True,'anonymous_guards':'passed'}
 
@@ -159,6 +159,7 @@ from app.api.v1.game import list_inventory_games
 from app.api.v1.month_card import get_month_card_config
 from app.api.v1.play_pricing import get_pricing
 from app.api.v1.auth import me
+from app.api.v1.dish import list_categories
 app=create_app({'TESTING':True})
 checks=[]
 with app.app_context():
@@ -167,7 +168,9 @@ with app.app_context():
  account=StaffAccount.query.filter_by(enabled=True,headquarters=True).order_by(StaffAccount.user_id).first()
  sid=Store.query.filter_by(deleted_at=None,status=1).order_by(Store.id).first().id
  uid=account.user_id
- for name,fn,path in [('users',get_user_list,'/admin_api/user/v1/list?Current=1&PageSize=1'),('inventory',list_inventory_games,'/admin_api/game/v1/inventory/list?PageNum=1&PageSize=1'),('month_card_config',get_month_card_config,'/admin_api/month-card/v1/config'),('play_pricing',get_pricing,'/admin_api/play-pricing/v1'),('staff_permissions',me,'/admin_api/auth/v1/me')]:
+ # Keep the user smoke query bounded to this existing staff account. An
+ # unfiltered paginated list also counts every joined user/payment row.
+ for name,fn,path in [('users',get_user_list,f'/admin_api/user/v1/list?Current=1&PageSize=1&Id={uid}'),('inventory',list_inventory_games,'/admin_api/game/v1/inventory/list?PageNum=1&PageSize=1'),('month_card_config',get_month_card_config,'/admin_api/month-card/v1/config'),('play_pricing',get_pricing,'/admin_api/play-pricing/v1'),('staff_permissions',me,'/admin_api/auth/v1/me'),('dish_categories',list_categories,'/admin_api/dish/v1/categories')]:
   with app.test_request_context(path):
    g.staff,g.staff_user,g.grants=principal(uid)
    g.store_id=sid;g.scope_store=sid
