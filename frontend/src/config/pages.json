@@ -139,6 +139,17 @@
     }
   },
   {
+    "id": "dish-categories",
+    "path": "/dish-categories",
+    "name": "餐品分类",
+    "component": "./DishCategories",
+    "scope": "admin",
+    "group": {
+      "id": "catering-center",
+      "name": "餐饮管理"
+    }
+  },
+  {
     "id": "users",
     "path": "/users",
     "name": "会员资料",

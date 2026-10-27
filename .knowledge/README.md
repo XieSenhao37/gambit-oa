@@ -1,5 +1,12 @@
 # Gambit OA 知识库
 
+## 餐品分类管理（2026-10-27）
+
+- 餐饮管理新增 `/dish-categories`，页面权限 `dish-categories`、`admin` 范围，仅总部管理共用分类；门店菜单／餐品资料库仍可读取分类。功能搜索兼容“菜品分类／饮品分类／分类管理”。
+- API `/admin_api/dish/v1/categories` GET/POST、`/<id>` PUT/DELETE，复用 `dish_categories`，无需迁移。支持名称（去首尾空白、最多60字、有效分类不重名）、非负整数排序和软删除；数值越小越靠前，同序按ID。小程序沿用既有 Go 菜单读取，无需修改小程序或Go。
+- 编辑／删除须携带列表返回的 `Revision`，过期返回409并保留前端草稿，需重新打开编辑获取新版本。删除锁定分类后，以当前锁定读取检查全部门店的未删除餐品资料库和旧 `dishes`（含下架餐品），有引用则拒绝；不自动移除餐品分类。OA餐品保存校验并锁定有效分类，禁止引用已删除或不存在的分类。
+- 分类页复用 AdaptiveTable 与 `oa-operation-modal`，无改动直接关闭，有草稿关闭前确认，保存中防重复提交。隔离验证：在backend目录执行 `.venv/bin/python -m unittest discover -s tests -p test_dish_categories.py`，覆盖总部权限、跨店／下架引用、软删除、排序、重名、冲突与餐品分类校验。
+
 ## OA 页面规范与导航（2026-10-21）
 
 - 菜单唯一来源为 `backend/app/security/pages.json`，构建时 `frontend/scripts/sync-pages.cjs` 同步。工作台、订单中心、桌游管理、餐饮管理、会员与积分、活动与展示、经营与财务、系统设置共八个入口；原页面 ID、URL、门店范围及角色授权不随分组调整改变。

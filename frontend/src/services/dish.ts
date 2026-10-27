@@ -1,5 +1,33 @@
 import { request } from '@umijs/max';
 
+export async function queryDishCategories() {
+  return request<API.Response<{ Items: API.DishCategory[] }>>(
+    '/admin_api/dish/v1/categories',
+  );
+}
+
+export async function saveDishCategory(
+  data: { Name: string; Sort: number; Revision?: string },
+  id?: number,
+) {
+  return request<API.Response<API.DishCategory>>(
+    id
+      ? `/admin_api/dish/v1/categories/${id}`
+      : '/admin_api/dish/v1/categories',
+    { method: id ? 'PUT' : 'POST', data },
+  );
+}
+
+export async function deleteDishCategory(item: API.DishCategory) {
+  return request<API.Response<null>>(
+    `/admin_api/dish/v1/categories/${item.Id}`,
+    {
+      method: 'DELETE',
+      data: { Revision: item.Revision },
+    },
+  );
+}
+
 export async function queryDishes(params: API.QueryDishesParams) {
   return request<API.Response<API.DishListData>>('/admin_api/dish/v1/list', {
     method: 'GET',

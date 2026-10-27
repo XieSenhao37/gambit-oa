@@ -1,8 +1,9 @@
 """餐品管理接口（OA 直连数据库）"""
 import json
+import hashlib
 from datetime import datetime
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, abort, jsonify, request
 
 from app import db
 from app.middlewares.auth import login_required
@@ -56,7 +57,118 @@ def _serialize_category(category):
         'Id': category.id,
         'Name': category.name,
         'Sort': category.sort,
+        'Revision': _category_revision(category),
     }
+
+
+def _category_revision(category):
+    content = [category.name, category.sort, str(category.updated_at)]
+    return hashlib.sha256(json.dumps(content, ensure_ascii=False).encode()).hexdigest()
+
+
+def _validate_category_ids(raw):
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except ValueError:
+            raise ValueError('分类格式错误，应为分类 ID 数组')
+    ids = raw
+    if not isinstance(ids, list) or any(type(value) is not int or value <= 0 for value in ids):
+        raise ValueError('分类格式错误，应为分类 ID 数组')
+    if not ids:
+        raise ValueError('至少选择一个分类')
+    # Share the category row lock with deletion until the dish write commits.
+    categories = DishCategory.query.filter(
+        DishCategory.id.in_(ids), DishCategory.deleted_at.is_(None),
+    ).order_by(DishCategory.id).with_for_update().all()
+    if set(ids) != {category.id for category in categories}:
+        raise ValueError('所选分类已删除或不存在，请刷新后重新选择')
+    return list(dict.fromkeys(ids))
+
+
+@dish_bp.route('/categories', methods=['GET'])
+@login_required('dish-categories', 'dish-library', 'dishes')
+def list_categories():
+    items = DishCategory.query.filter(DishCategory.deleted_at.is_(None)).order_by(
+        DishCategory.sort.asc(), DishCategory.id.asc(),
+    ).all()
+    return jsonify(Code=0, Message='success', Data={'Items': [_serialize_category(c) for c in items]})
+
+
+def _category_payload():
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        abort(400, description='请提交分类名称和排序')
+    name = body.get('Name')
+    if not isinstance(name, str) or not name.strip():
+        abort(400, description='请输入分类名称')
+    name = name.strip()
+    if len(name) > 60:
+        abort(400, description='分类名称最多 60 字')
+    sort = body.get('Sort', 0)
+    if type(sort) is not int or not 0 <= sort <= 2147483647:
+        abort(400, description='排序必须是 0 至 2147483647 的整数')
+    return name, sort
+
+
+def _require_unique_category(name, excluding=None):
+    query = DishCategory.query.filter(DishCategory.deleted_at.is_(None), DishCategory.name == name)
+    if excluding is not None:
+        query = query.filter(DishCategory.id != excluding)
+    if query.first():
+        abort(400, description='已存在同名分类')
+
+
+def _category_for_edit(category_id):
+    item = DishCategory.query.filter(
+        DishCategory.id == category_id, DishCategory.deleted_at.is_(None),
+    ).with_for_update().populate_existing().first()
+    if not item:
+        abort(404, description='分类不存在或已删除')
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict) or body.get('Revision') != _category_revision(item):
+        abort(409, description='分类已更新，请刷新后重试')
+    return item
+
+
+@dish_bp.route('/categories', methods=['POST'])
+@login_required('dish-categories')
+def create_category():
+    name, sort = _category_payload()
+    _require_unique_category(name)
+    now = datetime.utcnow()
+    item = DishCategory(name=name, sort=sort, created_at=now, updated_at=now)
+    db.session.add(item)
+    db.session.commit()
+    return jsonify(Code=0, Message='创建成功', Data=_serialize_category(item))
+
+
+@dish_bp.route('/categories/<int:category_id>', methods=['PUT'])
+@login_required('dish-categories')
+def update_category(category_id):
+    name, sort = _category_payload()
+    item = _category_for_edit(category_id)
+    _require_unique_category(name, excluding=item.id)
+    item.name, item.sort, item.updated_at = name, sort, datetime.utcnow()
+    db.session.commit()
+    return jsonify(Code=0, Message='更新成功', Data=_serialize_category(item))
+
+
+@dish_bp.route('/categories/<int:category_id>', methods=['DELETE'])
+@login_required('dish-categories')
+def delete_category(category_id):
+    item = _category_for_edit(category_id)
+    # Include every store, down-shelf dishes, and legacy rows. Use a current
+    # locking read rather than a repeatable-read snapshot before deleting.
+    for model in (DishLibraryItem, Dish):
+        rows = db.session.query(model.category_ids).execution_options(global_reference_check=True).filter(
+            model.deleted_at.is_(None),
+        ).with_for_update().all()
+        if any(item.id in (_normalize_json_field(row[0], default=[]) or []) for row in rows):
+            abort(400, description='该分类已被餐品引用，请先修改相关餐品分类')
+    item.deleted_at = item.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify(Code=0, Message='删除成功', Data=None)
 
 
 def _serialize_option(option):
@@ -204,7 +316,7 @@ def _build_library_from_form(require_image=False):
         'description': (_read_form_value('Description') or '').strip(),
         'default_price': default_price,
         'image_url': image_url,
-        'category_ids': _parse_int_list(_read_form_value('CategoryIds')),
+        'category_ids': _validate_category_ids(_read_form_value('CategoryIds')),
         'options': _parse_int_list(_read_form_value('Options')),
         'tags': _parse_str_list(_read_form_value('Tags')),
     }
@@ -351,9 +463,7 @@ def _build_dish_from_form(*, require_image):
     if len(description) > 255:
         raise ValueError('描述过长，最多 255 字')
 
-    category_ids = _parse_int_list(_read_form_value('CategoryIds'))
-    if not category_ids:
-        raise ValueError('至少选择一个分类')
+    category_ids = _validate_category_ids(_read_form_value('CategoryIds'))
 
     option_ids = _parse_int_list(_read_form_value('Options'))
     tags = _parse_str_list(_read_form_value('Tags'), max_count=10)

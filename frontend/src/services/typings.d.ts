@@ -447,6 +447,7 @@ declare namespace API {
     StoreId?: number;
     Name: string;
     Sort: number;
+    Revision: string;
   }
 
   interface DishOptionItem {

@@ -40,6 +40,7 @@ const aliases: Record<string, string[]> = {
     '全天封顶',
     '桌游计价管理',
   ],
+  'dish-categories': ['菜品分类', '饮品分类', '分类排序', '分类管理'],
   users: ['用户管理', '找玩家', '手机号'],
   'month-card-open': ['赠卡', '开卡', '月卡'],
   'home-banners': ['轮播', '首页', '宣传'],
