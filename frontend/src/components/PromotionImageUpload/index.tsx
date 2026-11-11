@@ -1,4 +1,5 @@
 import { bannerPreviewUrl, uploadBanner } from '@/services/banner';
+import { compressPromotionImage } from '@/utils/imageCompression';
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Image, message, Space, Typography, Upload } from 'antd';
 import { useRef, useState } from 'react';
@@ -17,7 +18,7 @@ export default function ImageField({
   disabled?: boolean;
   onBusy: (busy: boolean) => void;
 }) {
-  const [uploading, setUploading] = useState(false);
+  const [phase, setPhase] = useState<'preparing' | 'uploading' | null>(null);
   const busy = useRef(false);
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
@@ -53,31 +54,43 @@ export default function ImageField({
       <Upload
         accept="image/png,image/jpeg,image/webp,image/gif"
         showUploadList={false}
-        disabled={uploading || disabled}
+        disabled={phase !== null || disabled}
         beforeUpload={async (file) => {
           if (busy.current) return false;
-          if (file.size > 10 * 1024 * 1024) {
-            message.error('图片不能超过 10MB');
-            return false;
-          }
           busy.current = true;
-          setUploading(true);
+          setPhase('preparing');
           onBusy(true);
           try {
-            const res = await uploadBanner(file);
+            const prepared = await compressPromotionImage(file);
+            if (prepared.size > 10 * 1024 * 1024) {
+              message.error('上传的图片不能超过 10MB');
+              return false;
+            }
+            setPhase('uploading');
+            const res = await uploadBanner(prepared);
             onChange?.(res.Url);
           } catch {
             message.error('上传失败，请重试');
           } finally {
             busy.current = false;
-            setUploading(false);
+            setPhase(null);
             onBusy(false);
           }
           return false;
         }}
       >
-        <Button icon={<UploadOutlined />} loading={uploading}>
-          {value ? '替换图片' : '上传图片'}
+        <Button
+          icon={<UploadOutlined />}
+          loading={phase !== null}
+          aria-busy={phase !== null}
+        >
+          {phase === 'preparing'
+            ? '正在处理图片'
+            : phase === 'uploading'
+            ? '正在上传'
+            : value
+            ? '替换图片'
+            : '上传图片'}
         </Button>
       </Upload>
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>

@@ -30,7 +30,11 @@ export const saveBanners = (Items: HomeBanner[], Revision: string) =>
 export const uploadBanner = (file: File) => {
   const data = new FormData();
   data.append('File', file);
-  return call<{ Url: string }>(endpoint + '/image', { method: 'POST', data });
+  return call<{ Url: string }>(endpoint + '/image', {
+    method: 'POST',
+    data,
+    timeout: 120_000,
+  });
 };
 // 历史图片仍使用原云存储文件，不重复上传、不改变小程序中的文件 ID。
 export function bannerPreviewUrl(url?: string) {

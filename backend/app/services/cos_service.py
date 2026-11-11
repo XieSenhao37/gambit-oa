@@ -8,11 +8,12 @@ from flask import current_app
 from qcloud_cos import CosConfig, CosS3Client
 
 
-def _get_client() -> CosS3Client:
+def _get_client(timeout: tuple[int, int] | None = None) -> CosS3Client:
     config = CosConfig(
         Region=current_app.config['COS_REGION'],
         SecretId=current_app.config['COS_SECRET_ID'],
         SecretKey=current_app.config['COS_SECRET_KEY'],
+        Timeout=timeout,
     )
     return CosS3Client(config)
 
@@ -21,12 +22,14 @@ def upload_file_to_cos(
     file_bytes: bytes,
     original_filename: str,
     folder: str = 'dish-images',
+    *,
+    timeout: tuple[int, int] | None = None,
 ) -> str:
     """上传文件到 COS，返回公开访问 URL。"""
     ext = PurePosixPath(original_filename).suffix or '.jpg'
     key = f'{folder}/{uuid.uuid4().hex}{ext}'
 
-    client = _get_client()
+    client = _get_client(timeout)
     bucket = current_app.config['COS_BUCKET']
     region = current_app.config['COS_REGION']
     client.put_object(

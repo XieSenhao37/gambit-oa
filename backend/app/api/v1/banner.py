@@ -80,7 +80,10 @@ def upload_image():
     if not content or len(content) > 10 * 1024 * 1024 or not matches.get(ext):
         return jsonify(Code=400, Message='请上传 10MB 以内的 JPG、PNG、GIF 或 WebP 图片'), 400
     try:
-        url = upload_file_to_cos(content, 'banner'+ext, folder='home-banners')
+        # COS connect and socket timeouts leave room for the SDK's default retry.
+        url = upload_file_to_cos(
+            content, 'banner' + ext, folder='home-banners', timeout=(5, 50),
+        )
         return jsonify(Code=0, Data={'Url': url})
     except Exception:
         current_app.logger.exception('上传首页 Banner 图片失败')

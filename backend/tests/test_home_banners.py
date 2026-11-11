@@ -107,6 +107,7 @@ class HomeBannersTest(unittest.TestCase):
             result = self.client.post('/banners/image', headers=self.headers, data={'File': (io.BytesIO(b'\xff\xd8\xff\xe0test'), 'new.JPG')})
             self.assertEqual(result.json['Data']['Url'], 'https://example.com/new.jpg')
             self.assertEqual(upload.call_args.kwargs['folder'], 'home-banners')
+            self.assertEqual(upload.call_args.kwargs['timeout'], (5, 50))
 
 if __name__ == '__main__':
     unittest.main()
