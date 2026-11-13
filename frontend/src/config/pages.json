@@ -280,5 +280,38 @@
       "id": "system-center",
       "name": "系统设置"
     }
+  },
+  {
+    "id": "retail-catalog",
+    "path": "/retail-catalog",
+    "name": "商城商品与分类",
+    "component": "./RetailCatalog",
+    "scope": "admin",
+    "group": {
+      "id": "retail-center",
+      "name": "零售商城"
+    }
+  },
+  {
+    "id": "retail-management",
+    "path": "/retail-management",
+    "name": "门店商城管理",
+    "component": "./RetailManagement",
+    "scope": "store",
+    "group": {
+      "id": "retail-center",
+      "name": "零售商城"
+    }
+  },
+  {
+    "id": "retail-orders",
+    "path": "/retail-orders",
+    "name": "商城订单",
+    "component": "./RetailOrders",
+    "scope": "store",
+    "group": {
+      "id": "order-center",
+      "name": "订单中心"
+    }
   }
 ]

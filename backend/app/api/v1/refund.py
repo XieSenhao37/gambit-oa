@@ -245,7 +245,9 @@ def list_refunds():
 @refund_bp.route('/approve/<int:refund_request_id>', methods=['POST'])
 @login_required('refunds')
 def approve_refund(refund_request_id):
-    RefundRequest.query.filter_by(id=refund_request_id).first_or_404()
+    refund = RefundRequest.query.filter_by(id=refund_request_id).first_or_404()
+    if refund.order_type == 'retail':
+        return jsonify(Code=403, Message='请在商城订单中处理售后退款'), 403
     try:
         data = _call_gambit_server_refund_action(refund_request_id, 'approve')
     except Exception as exc:
@@ -265,7 +267,9 @@ def approve_refund(refund_request_id):
 @refund_bp.route('/reject/<int:refund_request_id>', methods=['POST'])
 @login_required('refunds')
 def reject_refund(refund_request_id):
-    RefundRequest.query.filter_by(id=refund_request_id).first_or_404()
+    refund = RefundRequest.query.filter_by(id=refund_request_id).first_or_404()
+    if refund.order_type == 'retail':
+        return jsonify(Code=403, Message='请在商城订单中处理售后退款'), 403
     remark = (request.get_json() or {}).get('Remark', '')
     try:
         data = _call_gambit_server_refund_action(

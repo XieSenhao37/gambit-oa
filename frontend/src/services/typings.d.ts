@@ -317,7 +317,7 @@ declare namespace API {
     | 'refunded'
     | 'refund_failed';
 
-  type RefundOrderType = 'play' | 'catering' | 'organization';
+  type RefundOrderType = 'play' | 'catering' | 'organization' | 'retail';
 
   interface RefundRequest {
     Id: number;
