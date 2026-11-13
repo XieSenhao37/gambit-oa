@@ -29,6 +29,7 @@ const orderTypeMeta = {
   play: { text: '玩乐', color: 'purple' },
   catering: { text: '吃喝', color: 'cyan' },
   organization: { text: '组局意向金', color: 'blue' },
+  retail: { text: '商城', color: 'geekblue' },
 } satisfies Record<API.RefundOrderType, { text: string; color: string }>;
 
 const formatPrice = (value?: number) => `¥${((value || 0) / 100).toFixed(2)}`;
@@ -117,12 +118,12 @@ const RefundsPage: React.FC = () => {
                 failures.push(
                   `${record.User?.NickName || `申请 ${record.Id}`}：${
                     response.Msg || response.Message || '操作失败'
-                  }`,
+                  }`
                 );
               }
             } catch {
               failures.push(
-                `${record.User?.NickName || `申请 ${record.Id}`}：请求失败`,
+                `${record.User?.NickName || `申请 ${record.Id}`}：请求失败`
               );
             }
           }
@@ -130,8 +131,8 @@ const RefundsPage: React.FC = () => {
         try {
           await Promise.all(
             Array.from({ length: Math.min(3, records.length) }, () =>
-              runWorker(),
-            ),
+              runWorker()
+            )
           );
           if (failures.length === 0) {
             message.success(`已发起 ${successCount} 笔退款`);
@@ -242,7 +243,7 @@ const RefundsPage: React.FC = () => {
       onOk: async () => {
         if (!remark.trim()) {
           message.warning(
-            isOrganization ? '请填写不退款原因' : '请填写拒绝原因',
+            isOrganization ? '请填写不退款原因' : '请填写拒绝原因'
           );
           return Promise.reject();
         }
@@ -254,7 +255,7 @@ const RefundsPage: React.FC = () => {
           if (response.Code === 0) {
             message.success(
               response.Message ||
-                (isOrganization ? '已标记为不退款' : '已拒绝退款申请'),
+                (isOrganization ? '已标记为不退款' : '已拒绝退款申请')
             );
             actionRef.current?.reload();
           } else {
@@ -290,6 +291,7 @@ const RefundsPage: React.FC = () => {
         play: { text: '玩乐' },
         catering: { text: '吃喝' },
         organization: { text: '组局意向金' },
+        retail: { text: '商城' },
       },
       render: (_, record) => {
         const meta = getOrderTypeMeta(record);
@@ -350,7 +352,7 @@ const RefundsPage: React.FC = () => {
         Object.entries(statusMeta).map(([key, value]) => [
           key,
           { text: value.text },
-        ]),
+        ])
       ),
       render: (_, record) => {
         const meta = getStatusMeta(record);
@@ -364,6 +366,9 @@ const RefundsPage: React.FC = () => {
       fixed: 'right',
       search: false,
       render: (_, record) => {
+        if (record.OrderType === 'retail') {
+          return <Text type="secondary">请在商城订单中处理</Text>;
+        }
         if (record.Status === 'refund_failed') {
           return (
             <Button
