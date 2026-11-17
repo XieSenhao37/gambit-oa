@@ -238,6 +238,17 @@
     }
   },
   {
+    "id": "coupons",
+    "path": "/coupons",
+    "name": "优惠券管理",
+    "component": "./Coupons",
+    "scope": "admin",
+    "group": {
+      "id": "activity-center",
+      "name": "活动与展示"
+    }
+  },
+  {
     "id": "home-banners",
     "path": "/home-banners",
     "name": "小程序展示",
