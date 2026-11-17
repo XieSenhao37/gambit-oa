@@ -10,6 +10,7 @@ import {
   Form,
   Input,
   InputNumber,
+  Pagination,
   message,
   Select,
   Space,
@@ -431,6 +432,13 @@ function StockHistory({
   );
 }
 
+type StockRow = {
+  key: string;
+  product: Product;
+  sku?: SKU;
+  productRowSpan: number;
+};
+
 export default function RetailManagement() {
   const [history, setHistory] = useState<{ stockID: number; title: string }>();
   const [products, setProducts] = useState<Product[]>([]),
@@ -473,6 +481,16 @@ export default function RetailManagement() {
       seq.current++;
     };
   }, [page, keyword, revision]);
+  const stockRows = products.flatMap<StockRow>((product) =>
+    product.Offers?.length
+      ? product.Offers.map((sku, index) => ({
+          key: `${product.ID}:${sku.ID}`,
+          product,
+          sku,
+          productRowSpan: index === 0 ? product.Offers.length : 0,
+        }))
+      : [{ key: `${product.ID}:none`, product, productRowSpan: 1 }]
+  );
   return (
     <PageContainer
       title="门店商城管理"
@@ -495,62 +513,95 @@ export default function RetailManagement() {
                   }}
                   style={{ maxWidth: 360, marginBottom: 16 }}
                 />
-                <Table<Product>
-                  rowKey="ID"
+                <Table<StockRow>
+                  rowKey="key"
                   loading={busy}
-                  dataSource={products}
-                  pagination={{
-                    current: page,
-                    pageSize: 20,
-                    total,
-                    onChange: setPage,
-                  }}
+                  dataSource={stockRows}
+                  pagination={false}
                   columns={[
-                    { title: '商品', dataIndex: 'Name', width: 250 },
                     {
-                      title: '商品状态',
-                      width: 100,
-                      dataIndex: 'Enabled',
-                      render: (v) => (v ? '可售' : '已停用'),
+                      title: '商品',
+                      width: 240,
+                      onCell: (row) => ({ rowSpan: row.productRowSpan }),
+                      render: (_, { product }) => product.Name,
                     },
                     {
-                      title: '规格与本店库存',
-                      width: 420,
-                      render: (_, p) => (
-                        <Space direction="vertical" style={{ width: '100%' }}>
-                          {p.Offers.map((s) => (
-                            <Space key={s.ID} wrap>
-                              <span>{s.Name}</span>
-                              <span>{money(s.Price)}</span>
-                              <span>可售 {s.Available}</span>
-                              <span>{s.OnSale ? '已上架' : '未上架'}</span>
+                      title: '商品状态',
+                      width: 92,
+                      onCell: (row) => ({ rowSpan: row.productRowSpan }),
+                      render: (_, { product }) =>
+                        product.Enabled ? '可售' : '已停用',
+                    },
+                    {
+                      title: '规格',
+                      width: 120,
+                      render: (_, { sku }) => sku?.Name ?? '—',
+                    },
+                    {
+                      title: '本店售价',
+                      width: 110,
+                      align: 'right',
+                      render: (_, { sku }) =>
+                        sku && sku.StockID > 0 ? money(sku.Price) : '—',
+                    },
+                    {
+                      title: '可售库存',
+                      width: 88,
+                      align: 'right',
+                      render: (_, { sku }) =>
+                        sku && sku.StockID > 0 ? sku.Available : '—',
+                    },
+                    {
+                      title: '本店上架状态',
+                      width: 120,
+                      render: (_, { sku }) => {
+                        if (!sku) return '—';
+                        if (!sku.StockID) return '未配置';
+                        return sku.OnSale ? '已上架' : '未上架';
+                      },
+                    },
+                    {
+                      title: '操作',
+                      width: 164,
+                      render: (_, { product, sku }) =>
+                        sku && (
+                          <Space size={0}>
+                            <Button
+                              type="link"
+                              onClick={() =>
+                                setStock({ sku, name: product.Name })
+                              }
+                            >
+                              调整
+                            </Button>
+                            {sku.StockID > 0 && (
                               <Button
                                 type="link"
                                 onClick={() =>
-                                  setStock({ sku: s, name: p.Name })
+                                  setHistory({
+                                    stockID: sku.StockID,
+                                    title: `${product.Name} · ${sku.Name}`,
+                                  })
                                 }
                               >
-                                调整
+                                库存记录
                               </Button>
-                              {s.StockID > 0 && (
-                                <Button
-                                  type="link"
-                                  onClick={() =>
-                                    setHistory({
-                                      stockID: s.StockID,
-                                      title: `${p.Name} · ${s.Name}`,
-                                    })
-                                  }
-                                >
-                                  库存记录
-                                </Button>
-                              )}
-                            </Space>
-                          ))}
-                        </Space>
-                      ),
+                            )}
+                          </Space>
+                        ),
                     },
                   ]}
+                />
+                {/* The API paginates products, so each page displays all of their SKUs. */}
+                <Pagination
+                  align="end"
+                  style={{ marginTop: 16 }}
+                  current={page}
+                  pageSize={20}
+                  total={total}
+                  showSizeChanger={false}
+                  showTotal={(count) => `共 ${count} 款商品`}
+                  onChange={setPage}
                 />
               </Card>
             ),
