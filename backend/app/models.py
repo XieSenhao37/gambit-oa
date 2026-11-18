@@ -1,6 +1,6 @@
 from app import db
 from datetime import datetime
-from sqlalchemy.orm import foreign
+from sqlalchemy.orm import deferred, foreign
 import base64
 
 
@@ -267,6 +267,7 @@ class CouponPromotion(db.Model):
     amount = db.Column(db.Integer, nullable=False, comment='券额度')
     minimum_amount = db.Column(db.Integer, nullable=False, comment='券门槛额度')
     count = db.Column(db.Integer, nullable=False, comment='券数量')
+    raffle_reserved = deferred(db.Column(db.Integer, nullable=False, server_default='0'))
     expire = db.Column(db.Integer, nullable=False, comment='券有效期')
     start_date = db.Column(db.DateTime, nullable=False, comment='活动开始日期')
     end_date = db.Column(db.DateTime, nullable=False, comment='活动截止日期')
@@ -284,6 +285,7 @@ class CouponRecord(db.Model):
     updated_at = db.Column(db.DateTime, comment='更新时间')
     deleted_at = db.Column(db.DateTime, comment='删除时间')
     promotion_id = db.Column(db.Integer, nullable=False, comment='关联活动 id')
+    raffle_entry_id = deferred(db.Column(db.Integer))
     open_id = db.Column(db.String(60), nullable=False, comment='领取人 OpenID')
     status = db.Column(db.Integer, nullable=False, comment='券状态')
     expire_at = db.Column(db.DateTime, comment='过期时间')
