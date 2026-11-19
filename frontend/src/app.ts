@@ -35,6 +35,7 @@ import {
   LogoutOutlined,
   ProfileOutlined,
   SettingOutlined,
+  ShoppingOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
 import { history, RequestConfig, RuntimeConfig } from '@umijs/max';
@@ -76,6 +77,7 @@ export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
         '/workbench': HomeOutlined,
         '/order-center': ProfileOutlined,
         '/game-center': AppstoreOutlined,
+        '/retail-center': ShoppingOutlined,
         '/catering-center': CoffeeOutlined,
         '/member-center': TeamOutlined,
         '/activity-center': CalendarOutlined,
