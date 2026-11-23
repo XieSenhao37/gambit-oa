@@ -46,6 +46,25 @@ class RetailGatewayTest(unittest.TestCase):
             self.assertEqual(self.client.get('/admin_api/retail/v1/orders',headers={**self.headers,'X-Store-ID':'999'}).status_code,403)
             self.assertEqual(self.client.get('/admin_api/retail/v1/orders').status_code,401)
             send.assert_not_called()
+
+    def test_product_sort_requires_headquarters_and_forwards_signed_order(self):
+        path = '/admin_api/retail/v1/products/10/sort'
+        payload = {'Sort': -1, 'Version': 3}
+        with patch('app.api.v1.retail.requests.request', return_value=self.response) as send:
+            for store_id in ('1', '2'):
+                headers = {**self.headers, 'X-Store-ID': store_id}
+                self.assertEqual(self.client.put(path, headers=headers, json=payload).status_code, 403)
+            send.assert_not_called()
+
+            db.session.get(StaffAccount, 1).headquarters = True
+            db.session.commit()
+            self.assertEqual(self.client.put(path, headers=self.headers, json=payload).status_code, 200)
+            self.assertEqual(send.call_args.args, (
+                'PUT', 'https://isolated.invalid/microapp_api/admin/retail/v1/products/10/sort',
+            ))
+            self.assertEqual(send.call_args.kwargs['json'], {
+                **payload, 'StoreID': 1, 'Actor': '1',
+            })
     def test_unknown_outcome_and_action_allowlist(self):
         with patch('app.api.v1.retail.requests.request',side_effect=requests.Timeout):
             r=self.client.put('/admin_api/retail/v1/stock',headers=self.headers,json={})

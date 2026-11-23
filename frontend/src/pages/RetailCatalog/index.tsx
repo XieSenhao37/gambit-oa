@@ -25,6 +25,59 @@ import RetailEditor from '@/components/RetailEditor';
 import { call, Category, Product } from '@/services/retail';
 
 const required = [{ required: true, message: '请填写' }];
+
+function ProductSortField() {
+  return (
+    <Form.Item
+      name="Sort"
+      label="展示顺序"
+      extra="各门店共用此顺序。数字越小越靠前，默认 0，可填负数。同值时新品靠前。"
+      rules={[
+        { required: true, message: '请输入展示顺序' },
+        {
+          type: 'integer',
+          min: Number.MIN_SAFE_INTEGER,
+          max: Number.MAX_SAFE_INTEGER,
+          message: '请输入有效的整数',
+        },
+      ]}
+    >
+      <InputNumber step={1} style={{ width: 160 }} />
+    </Form.Item>
+  );
+}
+
+function ProductSortEditor({
+  product,
+  close,
+  saved,
+}: {
+  product: Product;
+  close: () => void;
+  saved: () => void;
+}) {
+  const [form] = Form.useForm();
+  return (
+    <RetailEditor
+      title="调整商品展示顺序"
+      width={440}
+      form={form}
+      initialValues={{ Sort: product.Sort ?? 0 }}
+      onClose={close}
+      onSave={async ({ Sort }) => {
+        await call(`products/${product.ID}/sort`, 'PUT', {
+          Sort,
+          Version: product.Version,
+        });
+        saved();
+      }}
+    >
+      <p>{product.Name}</p>
+      <ProductSortField />
+    </RetailEditor>
+  );
+}
+
 function ProductEditor({
   product,
   categories,
@@ -94,13 +147,11 @@ function ProductEditor({
             }))}
           />
         </Form.Item>
-        <Form.Item name="Sort" label="排序">
-          <InputNumber min={0} precision={0} />
-        </Form.Item>
         <Form.Item name="Enabled" label="商品可售" valuePropName="checked">
           <Switch />
         </Form.Item>
       </Space>
+      <ProductSortField />
       <Form.Item
         label="商品图片"
         extra="第一张为封面；最多12张。门店还需设置价格、库存及上架状态。"
@@ -312,6 +363,7 @@ export default function RetailCatalog() {
     [revision, setRevision] = useState(0);
   const [product, setProduct] = useState<Partial<Product>>(),
     [category, setCategory] = useState<Partial<Category>>();
+  const [productToSort, setProductToSort] = useState<Product>();
   const seq = useRef(0);
   const reload = () => setRevision((v) => v + 1);
   useEffect(() => {
@@ -411,11 +463,22 @@ export default function RetailCatalog() {
                       render: (v) => (v ? '可售' : '已停用'),
                     },
                     {
+                      title: '展示顺序',
+                      dataIndex: 'Sort',
+                      width: 120,
+                      render: (sort) => sort ?? 0,
+                    },
+                    {
                       title: '操作',
                       render: (_, p) => (
-                        <Button type="link" onClick={() => setProduct(p)}>
-                          编辑
-                        </Button>
+                        <Space size={0}>
+                          <Button type="link" onClick={() => setProductToSort(p)}>
+                            调整顺序
+                          </Button>
+                          <Button type="link" onClick={() => setProduct(p)}>
+                            编辑
+                          </Button>
+                        </Space>
                       ),
                     },
                   ]}
@@ -472,6 +535,13 @@ export default function RetailCatalog() {
           product={product}
           categories={categories}
           close={() => setProduct(undefined)}
+          saved={reload}
+        />
+      )}
+      {productToSort && (
+        <ProductSortEditor
+          product={productToSort}
+          close={() => setProductToSort(undefined)}
           saved={reload}
         />
       )}
