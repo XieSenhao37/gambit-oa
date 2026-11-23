@@ -455,21 +455,24 @@ export default function RetailCatalog() {
                     {
                       title: '分类',
                       dataIndex: 'CategoryID',
+                      width: 144,
                       render: (id) => categories.find((c) => c.ID === id)?.Name,
                     },
                     {
                       title: '状态',
                       dataIndex: 'Enabled',
+                      width: 92,
                       render: (v) => (v ? '可售' : '已停用'),
                     },
                     {
                       title: '展示顺序',
                       dataIndex: 'Sort',
-                      width: 120,
+                      width: 104,
                       render: (sort) => sort ?? 0,
                     },
                     {
                       title: '操作',
+                      width: 168,
                       render: (_, p) => (
                         <Space size={0}>
                           <Button type="link" onClick={() => setProductToSort(p)}>
