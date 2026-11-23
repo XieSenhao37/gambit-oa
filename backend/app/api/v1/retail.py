@@ -53,6 +53,10 @@ def product(product_id): return proxy(f'products/{product_id}')
 @login_required('retail-catalog')
 def save_product(): return proxy('products', 'PUT')
 
+@bp.put('/products/<int:product_id>/sort')
+@login_required('retail-catalog')
+def save_product_sort(product_id): return proxy(f'products/{product_id}/sort', 'PUT')
+
 @bp.put('/stock')
 @login_required('retail-management')
 def save_stock(): return proxy('stock', 'PUT')
